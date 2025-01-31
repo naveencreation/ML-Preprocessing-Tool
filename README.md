@@ -8,7 +8,7 @@ Welcome to the **Data Processing Tool**! This Streamlit-based app is designed fo
 - **Home**: Overview and introduction to the tool.
 - **Auto Preprocessing**: Automatically preprocess CSV data for common data issues.
 - **Model Selection**: Helps you choose the right model based on your dataset and task.
-- **About Me**: Learn more about the developer and the purpose of this tool.
+- **About Me**: This provides a snapshot of who I am!.
 
 ### 🛠 Preprocessing Pages:
 - **EDA (Exploratory Data Analysis)**: Visualize and understand your dataset with plots and summaries.
@@ -39,7 +39,7 @@ To get started with this app, ensure you have Python and Streamlit installed:
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/data-processing-tool.git
+   git clone https://github.com/naveencreation/ML-Preprocessing-Tool.git
    ```
 2. Navigate to the project folder:
    ```bash
@@ -83,10 +83,10 @@ Feel free to fork this repository and contribute by opening issues or submitting
 
 ## 📩 Contact
 
-**Developer:** [Your Name]  
-📧 Email: [Your Email]  
-🔗 LinkedIn: [Your LinkedIn Profile]  
-🐙 GitHub: [Your GitHub Profile]
+**Developer:** [Naveen S]  
+📧 Email: [naveenselvan0004@gmail.com]  
+🔗 LinkedIn: [https://www.linkedin.com/in/naveen0004/]  
+🐙 GitHub: [https://github.com/naveencreation]
 
 ## 📜 License
 
