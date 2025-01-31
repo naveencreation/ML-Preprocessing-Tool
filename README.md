@@ -58,8 +58,7 @@ Check out the deployed version of the app on Streamlit Cloud:
 ## 🖥 Screenshots
 
 ![Home Page](screenshots/home.png)  
-![EDA Page](screenshots/eda.png)  
-![Feature Scaling](screenshots/feature_scaling.png)  
+![Preprocessing Page](screenshots/preprocessing.png)    
 
 ## 🛠 Usage Guide
 
