@@ -57,8 +57,8 @@ Check out the deployed version of the app on Streamlit Cloud:
 
 ## 🖥 Screenshots
 
-![Home Page](screenshots/home.png)  
-![Preprocessing Page](screenshots/preprocessing.png)    
+![Home Page](Screenshots/home.png)  
+![Preprocessing Page](Screenshots/preprocessing.png)    
 
 ## 🛠 Usage Guide
 
