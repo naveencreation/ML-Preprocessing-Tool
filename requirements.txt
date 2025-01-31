@@ -1,0 +1,11 @@
+streamlit==1.24.0
+streamlit-option-menu==0.3.1
+Pillow==9.3.0
+pandas==2.0.1
+numpy==1.24.2
+scikit-learn==1.2.2
+imbalanced-learn==0.10.0
+plotly==5.10.0
+seaborn==0.11.2
+matplotlib==3.7.1
+scipy==1.10.0
