@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Premium Blue/Teal Palette */
+    --background: 210 20% 98%;
+    --foreground: 215 25% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 12%;
+
+    /* Primary: Rich Blue */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Soft Teal */
+    --secondary: 180 30% 94%;
+    --secondary-foreground: 215 25% 12%;
+
+    --muted: 210 20% 95%;
+    --muted-foreground: 215 15% 45%;
+
+    /* Accent: Vibrant Teal */
+    --accent: 175 60% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 217 91% 60%;
+
+    /* Chart Colors: Vibrant & Analytical */
+    --chart-1: 217 91% 60%;
+    /* Blue */
+    --chart-2: 175 60% 50%;
+    /* Teal */
+    --chart-3: 142 71% 45%;
+    /* Green */
+    --chart-4: 262 83% 58%;
+    /* Purple */
+    --chart-5: 346 84% 61%;
+    /* Pink */
+
+    --radius: 0.5rem;
+    --sidebar-width: 16rem;
+  }
+
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 20% 98%;
+    --card: 222 47% 15%;
+    --card-foreground: 210 20% 98%;
+    --popover: 222 47% 15%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 222 47% 20%;
+    --secondary-foreground: 210 20% 98%;
+
+    --muted: 222 47% 20%;
+    --muted-foreground: 215 15% 60%;
+
+    --accent: 175 60% 50%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 222 47% 20%;
+    --input: 222 47% 20%;
+    --ring: 217 91% 60%;
+
+    --chart-1: 217 91% 65%;
+    --chart-2: 175 60% 55%;
+    --chart-3: 142 71% 50%;
+    --chart-4: 262 83% 63%;
+    --chart-5: 346 84% 66%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted/30;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+
+  /* Focus visible improvements */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Glassmorphism */
+  .glass {
+    @apply bg-background/80 backdrop-blur-md border border-border/50;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+}
