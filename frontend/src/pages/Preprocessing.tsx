@@ -11,7 +11,7 @@ import { motion } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 import { getDatasetPreview, applyPreprocessing, generatePreprocessingCode } from "@/lib/api"
 import type { PreprocessingOptions } from "@/lib/api"
-import InfoTooltip, { ExplanationSection, ProsList, ConsList } from "@/components/InfoTooltip"
+import InfoTooltip from "@/components/InfoTooltip"
 import CodeBlock from "@/components/CodeBlock"
 import { missingValueExplanations, encodingExplanations, scalingExplanations, outlierExplanations, featureEngineeringExplanations } from "@/lib/preprocessing-explanations"
 import { MultiSelect } from "@/components/MultiSelect"
@@ -27,7 +27,7 @@ export default function Preprocessing() {
     const [processing, setProcessing] = useState(false)
     const [preview, setPreview] = useState<any[]>([])
     const [generatedCode, setGeneratedCode] = useState<string | null>(null)
-    const [showCode, setShowCode] = useState(false)
+
 
     const [options, setOptions] = useState<PreprocessingOptions>({
         missing_option: "Drop Rows",
@@ -66,7 +66,7 @@ export default function Preprocessing() {
         try {
             const result = await generatePreprocessingCode(parseInt(id), options)
             setGeneratedCode(result.code)
-            setShowCode(true)
+
         } catch (error) {
             console.error("Failed to generate code", error)
             toast({
