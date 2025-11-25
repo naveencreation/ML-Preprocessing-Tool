@@ -98,7 +98,7 @@ def upload_dataset(file: UploadFile = File(...), db: Session = Depends(get_db)):
         # If we created a csv but failed later
         if 'final_location' in locals() and os.path.exists(final_location) and final_location != temp_location:
             os.remove(final_location)
-            
+    
         raise HTTPException(status_code=400, detail=f"Error processing file: {str(e)}")
 
 @router.get("/", response_model=List[schemas.Dataset])

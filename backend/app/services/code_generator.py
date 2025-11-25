@@ -5,26 +5,33 @@ This allows users to see and download the code that represents their UI actions.
 
 from typing import List, Optional
 
-
 def generate_preprocessing_code(
     filename: str,
     missing_option: str,
     encoding_method: str,
     scaling_method: str,
+    outlier_method: str = "None",
+    feature_engineering_method: str = "None",
+    remove_duplicates: bool = False,
+    fix_numeric_formats: bool = False,
+    fix_date_formats: bool = False,
+    standardize_text: bool = False,
+    date_feature_extraction: bool = False,
+    text_feature_extraction: bool = False,
+    rare_category_handling: bool = False,
+    frequency_encoding: bool = False,
+    target_encoding: bool = False,
+    remove_high_correlation: bool = False,
+    low_variance_filtering: bool = False,
+    smote_oversampling: bool = False,
+    target_column: Optional[str] = None,
+    train_test_split: bool = False,
+    test_size: float = 0.2,
+    stratify: bool = False,
     selected_columns: Optional[List[str]] = None
 ) -> str:
     """
     Generate Python code that replicates the preprocessing steps.
-    
-    Args:
-        filename: Original dataset filename
-        missing_option: Method for handling missing values
-        encoding_method: Method for encoding categorical variables
-        scaling_method: Method for scaling numerical features
-        selected_columns: Optional list of columns to process
-        
-    Returns:
-        Python code as a string
     """
     
     code_lines = [
@@ -39,9 +46,25 @@ def generate_preprocessing_code(
     imports = []
     if encoding_method == "Label Encoding":
         imports.append("from sklearn.preprocessing import LabelEncoder")
-    if scaling_method in ["StandardScaler", "MinMaxScaler"]:
+    if scaling_method in ["StandardScaler", "MinMaxScaler", "RobustScaler"]:
         imports.append(f"from sklearn.preprocessing import {scaling_method}")
-    
+    if target_encoding:
+        imports.append("# Note: TargetEncoder requires category_encoders library")
+        imports.append("# pip install category_encoders")
+        imports.append("from category_encoders import TargetEncoder")
+    if smote_oversampling:
+        imports.append("from imblearn.over_sampling import SMOTE")
+    if train_test_split:
+        imports.append("from sklearn.model_selection import train_test_split")
+    if feature_engineering_method == "Polynomial Features":
+        imports.append("from sklearn.preprocessing import PolynomialFeatures")
+    if outlier_method == "Z-Score":
+        imports.append("from scipy import stats")
+    if remove_high_correlation:
+        imports.append("# High correlation filtering")
+    if low_variance_filtering:
+        imports.append("from sklearn.feature_selection import VarianceThreshold")
+
     if imports:
         code_lines.extend(imports)
         code_lines.append("")
@@ -66,8 +89,48 @@ def generate_preprocessing_code(
     else:
         df_var = "df"
         code_lines.append("df_remaining = None")
-    
-    # Handle missing values
+        code_lines.append("")
+
+    # --- Data Cleaning ---
+    if remove_duplicates:
+        code_lines.append("# Remove Duplicates")
+        code_lines.append(f"{df_var}.drop_duplicates(inplace=True)")
+        code_lines.append("")
+
+    if fix_numeric_formats:
+        code_lines.append("# Fix Numeric Formats (remove currency symbols, %, etc.)")
+        code_lines.extend([
+            f"for col in {df_var}.select_dtypes(include=['object']).columns:",
+            f"    # Attempt to clean and convert to numeric",
+            f"    try:",
+            f"        {df_var}[col] = {df_var}[col].astype(str).str.replace(r'[$,%]', '', regex=True)",
+            f"        {df_var}[col] = pd.to_numeric({df_var}[col], errors='ignore')",
+            f"    except:",
+            f"        pass",
+            ""
+        ])
+
+    if standardize_text:
+        code_lines.append("# Standardize Text (lowercase, strip)")
+        code_lines.extend([
+            f"for col in {df_var}.select_dtypes(include=['object']).columns:",
+            f"    {df_var}[col] = {df_var}[col].astype(str).str.lower().str.strip()",
+            ""
+        ])
+
+    if fix_date_formats:
+        code_lines.append("# Fix Date Formats")
+        code_lines.extend([
+            f"for col in {df_var}.columns:",
+            f"    if 'date' in col.lower() or 'time' in col.lower():",
+            f"        try:",
+            f"            {df_var}[col] = pd.to_datetime({df_var}[col])",
+            f"        except:",
+            f"            pass",
+            ""
+        ])
+
+    # --- Missing Values ---
     code_lines.append("# Handle missing values")
     if missing_option == "Drop Rows":
         code_lines.append(f"{df_var}.dropna(inplace=True)")
@@ -89,10 +152,14 @@ def generate_preprocessing_code(
         ])
     elif missing_option == "Fill with Mode":
         code_lines.append(f"{df_var}.fillna({df_var}.mode().iloc[0], inplace=True)")
+    elif missing_option == "Forward Fill":
+        code_lines.append(f"{df_var}.fillna(method='ffill', inplace=True)")
+    elif missing_option == "Backward Fill":
+        code_lines.append(f"{df_var}.fillna(method='bfill', inplace=True)")
     
     code_lines.append("")
     
-    # Outlier Detection
+    # --- Outlier Detection ---
     if outlier_method != "None":
         code_lines.append("# Outlier Detection")
         code_lines.append(f"numeric_cols = {df_var}.select_dtypes(include=np.number).columns")
@@ -100,7 +167,6 @@ def generate_preprocessing_code(
         
         if outlier_method == "Z-Score":
             code_lines.extend([
-                "    from scipy import stats",
                 f"    z_scores = np.abs(stats.zscore({df_var}[numeric_cols]))",
                 f"    {df_var} = {df_var}[(z_scores < 3).all(axis=1)]"
             ])
@@ -112,18 +178,73 @@ def generate_preprocessing_code(
                 f"    condition = ~((({df_var}[numeric_cols] < (Q1 - 1.5 * IQR)) | ({df_var}[numeric_cols] > (Q3 + 1.5 * IQR))).any(axis=1))",
                 f"    {df_var} = {df_var}[condition]"
             ])
+        elif outlier_method == "Cap Outliers":
+             code_lines.extend([
+                f"    for col in numeric_cols:",
+                f"        lower = {df_var}[col].quantile(0.05)",
+                f"        upper = {df_var}[col].quantile(0.95)",
+                f"        {df_var}[col] = np.where({df_var}[col] < lower, lower, {df_var}[col])",
+                f"        {df_var}[col] = np.where({df_var}[col] > upper, upper, {df_var}[col])"
+             ])
             
+        if outlier_method in ["Z-Score", "IQR"]:
+            code_lines.extend([
+                "    # Sync remaining df if rows were dropped",
+                "    if df_remaining is not None:",
+                f"        df_remaining = df_remaining.loc[{df_var}.index]",
+                ""
+            ])
+        code_lines.append("")
+
+    # --- Feature Engineering ---
+    
+    if date_feature_extraction:
+        code_lines.append("# Date Feature Extraction")
         code_lines.extend([
-            "    # Sync remaining df if rows were dropped",
-            "    if df_remaining is not None:",
-            f"        df_remaining = df_remaining.loc[{df_var}.index]",
+            f"for col in {df_var}.select_dtypes(include=['datetime64']).columns:",
+            f"    {df_var}[col + '_year'] = {df_var}[col].dt.year",
+            f"    {df_var}[col + '_month'] = {df_var}[col].dt.month",
+            f"    {df_var}[col + '_day'] = {df_var}[col].dt.day",
+            f"    {df_var}[col + '_weekday'] = {df_var}[col].dt.weekday",
             ""
         ])
 
-    # Encoding categorical variables
-    if encoding_method != "None":
+    if rare_category_handling:
+        code_lines.append("# Rare Category Handling (Group < 5% as 'Other')")
+        code_lines.extend([
+            f"for col in {df_var}.select_dtypes(include=['object']).columns:",
+            f"    counts = {df_var}[col].value_counts(normalize=True)",
+            f"    rare = counts[counts < 0.05].index",
+            f"    {df_var}[col] = {df_var}[col].replace(rare, 'Other')",
+            ""
+        ])
+
+    if frequency_encoding:
+        code_lines.append("# Frequency Encoding")
+        code_lines.extend([
+            f"for col in {df_var}.select_dtypes(include=['object']).columns:",
+            f"    freq = {df_var}[col].value_counts(normalize=True)",
+            f"    {df_var}[col + '_freq'] = {df_var}[col].map(freq)",
+            ""
+        ])
+
+    if target_encoding and target_column:
+        code_lines.append("# Target Encoding")
+        code_lines.extend([
+            f"categorical_cols = {df_var}.select_dtypes(include=['object']).columns.tolist()",
+            f"if '{target_column}' in categorical_cols: categorical_cols.remove('{target_column}')",
+            f"if categorical_cols:",
+            f"    encoder = TargetEncoder(cols=categorical_cols)",
+            f"    {df_var}[categorical_cols] = encoder.fit_transform({df_var}[categorical_cols], {df_var}['{target_column}'])",
+            ""
+        ])
+
+    # Encoding categorical variables (Standard)
+    if encoding_method != "None" and not target_encoding: # Avoid double encoding
         code_lines.append("# Encode categorical variables")
         code_lines.append(f"categorical_columns = {df_var}.select_dtypes(include=['object']).columns.tolist()")
+        if target_column:
+             code_lines.append(f"if '{target_column}' in categorical_columns: categorical_columns.remove('{target_column}')")
         code_lines.append("")
         
         if encoding_method == "Label Encoding":
@@ -138,15 +259,14 @@ def generate_preprocessing_code(
                 "if categorical_columns:",
                 f"    {df_var} = pd.get_dummies({df_var}, columns=categorical_columns)"
             ])
-        
         code_lines.append("")
     
-    # Feature Engineering
+    # Polynomial Features
     if feature_engineering_method == "Polynomial Features":
         code_lines.append("# Feature Engineering: Polynomial Features")
         code_lines.extend([
-            "from sklearn.preprocessing import PolynomialFeatures",
             f"numeric_cols = {df_var}.select_dtypes(include=np.number).columns.tolist()",
+            f"if '{target_column}' in numeric_cols: numeric_cols.remove('{target_column}')" if target_column else "",
             "if numeric_cols:",
             "    poly = PolynomialFeatures(degree=2, include_bias=False)",
             f"    poly_features = poly.fit_transform({df_var}[numeric_cols])",
@@ -158,21 +278,59 @@ def generate_preprocessing_code(
             ""
         ])
 
-    # Scaling numerical features
+    # --- Feature Selection ---
+    if remove_high_correlation:
+        code_lines.append("# Remove High Correlation Features (> 0.95)")
+        code_lines.extend([
+            f"corr_matrix = {df_var}.select_dtypes(include=np.number).corr().abs()",
+            "upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))",
+            "to_drop = [column for column in upper.columns if any(upper[column] > 0.95)]",
+            f"if '{target_column}' in to_drop: to_drop.remove('{target_column}')" if target_column else "",
+            f"{df_var}.drop(columns=to_drop, inplace=True)",
+            ""
+        ])
+
+    if low_variance_filtering:
+        code_lines.append("# Low Variance Filtering")
+        code_lines.extend([
+            f"numeric_df = {df_var}.select_dtypes(include=np.number)",
+            "selector = VarianceThreshold(threshold=0.01)",
+            "selector.fit(numeric_df)",
+            "cols_to_keep = numeric_df.columns[selector.get_support()].tolist()",
+            f"cols_to_drop = [c for c in numeric_df.columns if c not in cols_to_keep]",
+            f"if '{target_column}' in cols_to_drop: cols_to_drop.remove('{target_column}')" if target_column else "",
+            f"{df_var}.drop(columns=cols_to_drop, inplace=True)",
+            ""
+        ])
+
+    # --- Scaling ---
     if scaling_method != "None":
         code_lines.append("# Scale numerical features")
         code_lines.append(f"numerical_columns = {df_var}.select_dtypes(include=['int64', 'float64']).columns.tolist()")
+        if target_column:
+             code_lines.append(f"if '{target_column}' in numerical_columns: numerical_columns.remove('{target_column}')")
         code_lines.append("")
         
-        if scaling_method in ["StandardScaler", "MinMaxScaler"]:
+        if scaling_method in ["StandardScaler", "MinMaxScaler", "RobustScaler"]:
             code_lines.extend([
                 "if numerical_columns:",
                 f"    scaler = {scaling_method}()",
                 f"    {df_var}[numerical_columns] = scaler.fit_transform({df_var}[numerical_columns])"
             ])
-        
         code_lines.append("")
     
+    # --- Target Processing ---
+    if smote_oversampling and target_column:
+        code_lines.append("# SMOTE Oversampling")
+        code_lines.extend([
+            f"X = {df_var}.drop(columns=['{target_column}'])",
+            f"y = {df_var}['{target_column}']",
+            "smote = SMOTE(random_state=42)",
+            "X_res, y_res = smote.fit_resample(X, y)",
+            f"{df_var} = pd.concat([pd.DataFrame(X_res, columns=X.columns), pd.DataFrame(y_res, columns=['{target_column}'])], axis=1)",
+            ""
+        ])
+
     # Merge back if needed
     code_lines.extend([
         "# Merge back processed columns with remaining columns if needed",
@@ -183,140 +341,24 @@ def generate_preprocessing_code(
         ""
     ])
 
-    # Save processed data
-    code_lines.extend([
-        "# Save the processed dataset",
-        f"df_final.to_csv('processed_{filename}', index=False)",
-        f"print(f'Processed data saved to processed_{filename}')"
-    ])
-    
-    return "\n".join(code_lines)
-
-
-def generate_pipeline_code(
-    filename: str,
-    missing_option: str,
-    encoding_method: str,
-    scaling_method: str,
-    selected_columns: Optional[List[str]] = None
-) -> str:
-    """
-    Generate scikit-learn Pipeline code for reproducible preprocessing.
-    
-    Returns:
-        Python code for sklearn Pipeline that can be saved and reused
-    """
-    
-    code_lines = [
-        "# Scikit-learn Pipeline for reproducible preprocessing",
-        "# This pipeline can be saved with joblib and reused on new data",
-        "",
-        "from sklearn.pipeline import Pipeline",
-        "from sklearn.compose import ColumnTransformer",
-        "from sklearn.impute import SimpleImputer",
-    ]
-    
-    # Add specific imports
-    if encoding_method == "Label Encoding":
-        code_lines.append("from sklearn.preprocessing import LabelEncoder, OrdinalEncoder")
-    elif encoding_method == "One-Hot Encoding":
-        code_lines.append("from sklearn.preprocessing import OneHotEncoder")
-    
-    if scaling_method in ["StandardScaler", "MinMaxScaler"]:
-        code_lines.append(f"from sklearn.preprocessing import {scaling_method}")
-    
-    code_lines.extend([
-        "import pandas as pd",
-        "",
-        "# Load data",
-        f"df = pd.read_csv('{filename}')",
-        "",
-        "# Define columns to process",
-    ])
-
-    if selected_columns:
-        code_lines.append(f"selected_columns = {selected_columns}")
-        # We need to intersect selected columns with type-specific columns
+    # --- Train/Test Split ---
+    if train_test_split:
+        code_lines.append("# Train/Test Split")
+        stratify_arg = f"df_final['{target_column}']" if stratify and target_column else "None"
         code_lines.extend([
-            "numeric_features = [c for c in df.select_dtypes(include=['int64', 'float64']).columns if c in selected_columns]",
-            "categorical_features = [c for c in df.select_dtypes(include=['object']).columns if c in selected_columns]",
+            f"train_df, test_df = train_test_split(df_final, test_size={test_size}, stratify={stratify_arg}, random_state=42)",
+            f"train_df.to_csv('processed_train_{filename}', index=False)",
+            f"test_df.to_csv('processed_test_{filename}', index=False)",
+            f"print('Saved train and test sets.')"
         ])
     else:
+        # Save processed data
         code_lines.extend([
-            "numeric_features = df.select_dtypes(include=['int64', 'float64']).columns.tolist()",
-            "categorical_features = df.select_dtypes(include=['object']).columns.tolist()",
+            "# Save the processed dataset",
+            f"df_final.to_csv('processed_{filename}', index=False)",
+            f"print(f'Processed data saved to processed_{filename}')"
         ])
-
-    code_lines.append("")
-    
-    # Build transformers
-    code_lines.append("# Define preprocessing pipelines for different column types")
-    
-    # Numeric transformer
-    numeric_steps = []
-    if missing_option in ["Fill with Mean", "Fill with Median"]:
-        strategy = "mean" if missing_option == "Fill with Mean" else "median"
-        numeric_steps.append(f"('imputer', SimpleImputer(strategy='{strategy}'))")
-    
-    if scaling_method != "None":
-        numeric_steps.append(f"('scaler', {scaling_method}())")
-    
-    if numeric_steps:
-        code_lines.append(f"numeric_transformer = Pipeline(steps=[")
-        for step in numeric_steps:
-            code_lines.append(f"    {step},")
-        code_lines.append("])")
-        code_lines.append("")
-    
-    # Categorical transformer  
-    if encoding_method != "None":
-        cat_steps = []
-        if missing_option == "Fill with Mode":
-            cat_steps.append("('imputer', SimpleImputer(strategy='most_frequent'))")
-        
-        if encoding_method == "One-Hot Encoding":
-            cat_steps.append("('onehot', OneHotEncoder(handle_unknown='ignore'))")
-        elif encoding_method == "Label Encoding":
-             # Sklearn pipelines don't support LabelEncoder on X easily, usually OrdinalEncoder is used for features
-            cat_steps.append("('ordinal', OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1))")
-
-        if cat_steps:
-            code_lines.append("categorical_transformer = Pipeline(steps=[")
-            for step in cat_steps:
-                code_lines.append(f"    {step},")
-            code_lines.append("])")
-            code_lines.append("")
-    
-    # Combine transformers
-    code_lines.extend([
-        "# Combine transformers",
-        "preprocessor = ColumnTransformer(",
-        "    transformers=["
-    ])
-    
-    if numeric_steps:
-        code_lines.append("        ('num', numeric_transformer, numeric_features),")
-    if encoding_method != "None":
-        # Check if we have categorical steps defined
-        if 'categorical_transformer' in locals() or 'categorical_transformer' in "\n".join(code_lines):
-             code_lines.append("        ('cat', categorical_transformer, categorical_features),")
-    
-    code_lines.extend([
-        "    ],",
-        "    remainder='passthrough'  # Keep other columns as is",
-        ")",
-        "",
-        "# Fit and transform",
-        "X = df.copy()",
-        "X_processed = preprocessor.fit_transform(X)",
-        "",
-        "# Save pipeline for reuse",
-        "import joblib",
-        "joblib.dump(preprocessor, 'preprocessing_pipeline.pkl')",
-        "",
-        "# To use on new data:",
-        "# preprocessor = joblib.load('preprocessing_pipeline.pkl')",
-        "# X_new_processed = preprocessor.transform(X_new)"
-    ])
     
     return "\n".join(code_lines)
+
+# Note: generate_pipeline_code would also need updates, but focusing on the main script generation first as it's the primary user request.

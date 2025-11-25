@@ -22,7 +22,7 @@ class Settings:
     ALLOWED_EXTENSIONS: set = {".csv", ".xlsx", ".xls", ".json"}
     
     # CORS
-    BACKEND_CORS_ORIGINS: list = ["http://localhost:5173", "http://localhost:3000"]
+    BACKEND_CORS_ORIGINS: list = ["http://localhost:5173", "http://localhost:3000", "http://localhost:5174"]
     
     def create_directories(self):
         """Create necessary directories if they don't exist"""

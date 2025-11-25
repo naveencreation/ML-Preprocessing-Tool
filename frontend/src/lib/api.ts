@@ -14,7 +14,7 @@ export const uploadDataset = async (file: File) => {
     formData.append('file', file);
     const response = await api.post('/datasets/upload', formData, {
         headers: {
-            'Content-Type': 'multipart/form-data',
+            'Content-Type': 'multipart/form-data', // This will be auto-set by browser with boundary
         },
     });
     return response.data;
@@ -39,6 +39,32 @@ export interface PreprocessingOptions {
     outlier_method?: string
     feature_engineering_method?: string
     columns?: string[]
+
+    // Data Cleaning
+    remove_duplicates?: boolean
+    fix_numeric_formats?: boolean
+    fix_date_formats?: boolean
+    standardize_text?: boolean
+
+    // Feature Engineering
+    target_encoding?: boolean
+    frequency_encoding?: boolean
+    date_feature_extraction?: boolean
+    text_feature_extraction?: boolean
+    rare_category_handling?: boolean
+
+    // Target Processing
+    target_column?: string
+    smote_oversampling?: boolean
+
+    // Feature Selection
+    remove_high_correlation?: boolean
+    low_variance_filtering?: boolean
+
+    // Split
+    train_test_split?: boolean
+    test_size?: number
+    stratify?: boolean
 }
 
 export const applyPreprocessing = async (id: number, options: PreprocessingOptions) => {

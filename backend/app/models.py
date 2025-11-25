@@ -21,7 +21,7 @@ class Dataset(Base):
     
     # Relationships
     processing_logs = relationship("ProcessingLog", back_populates="dataset")
-    children = relationship("Dataset", backref=relationship("Dataset", remote_side=[id]))
+    children = relationship("Dataset", backref="parent", remote_side=[id])
 
 class ProcessingLog(Base):
     __tablename__ = "processing_logs"

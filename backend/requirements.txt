@@ -10,3 +10,5 @@ numpy
 scikit-learn
 plotly
 python-dotenv
+imbalanced-learn
+category_encoders

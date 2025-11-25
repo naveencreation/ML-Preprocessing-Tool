@@ -46,3 +46,52 @@ def generate_correlation_matrix(df: pd.DataFrame):
     correlation_matrix = numeric_df.corr()
     fig = px.imshow(correlation_matrix, title="Interactive Correlation Matrix", color_continuous_scale="RdBu", aspect="auto")
     return json.loads(fig.to_json())
+
+def get_quality_report(df: pd.DataFrame):
+    """
+    Generates a comprehensive data quality report.
+    """
+    # 1. Duplicates
+    duplicate_count = df.duplicated().sum()
+    duplicate_percent = (duplicate_count / len(df)) * 100 if len(df) > 0 else 0
+    
+    # 2. Missing Values
+    missing_counts = df.isnull().sum()
+    missing_total = missing_counts.sum()
+    missing_percent = (missing_total / (len(df) * len(df.columns))) * 100 if len(df) > 0 else 0
+    
+    # 3. Outliers (IQR method for numeric columns)
+    outliers = {}
+    numeric_cols = df.select_dtypes(include=[np.number]).columns
+    total_outliers = 0
+    
+    for col in numeric_cols:
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
+        col_outliers = ((df[col] < (Q1 - 1.5 * IQR)) | (df[col] > (Q3 + 1.5 * IQR))).sum()
+        if col_outliers > 0:
+            outliers[col] = int(col_outliers)
+            total_outliers += col_outliers
+            
+    # 4. Memory Usage
+    memory_usage = df.memory_usage(deep=True).sum()
+    
+    return {
+        "rows": len(df),
+        "columns": len(df.columns),
+        "duplicates": {
+            "count": int(duplicate_count),
+            "percentage": round(duplicate_percent, 2)
+        },
+        "missing": {
+            "total": int(missing_total),
+            "percentage": round(missing_percent, 2),
+            "by_column": missing_counts[missing_counts > 0].to_dict()
+        },
+        "outliers": {
+            "total": int(total_outliers),
+            "by_column": outliers
+        },
+        "memory_usage_bytes": int(memory_usage)
+    }

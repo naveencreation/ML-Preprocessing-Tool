@@ -44,7 +44,23 @@ def apply_preprocessing(
             options.missing_option, 
             options.encoding_method, 
             options.scaling_method,
-            options.columns
+            options.outlier_method,
+            options.feature_engineering_method,
+            options.columns,
+            # New Options
+            options.remove_duplicates,
+            options.fix_numeric_formats,
+            options.fix_date_formats,
+            options.standardize_text,
+            options.target_encoding,
+            options.frequency_encoding,
+            options.date_feature_extraction,
+            options.text_feature_extraction,
+            options.rare_category_handling,
+            options.target_column,
+            options.smote_oversampling,
+            options.remove_high_correlation,
+            options.low_variance_filtering
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Processing failed: {str(e)}")
@@ -53,45 +69,107 @@ def apply_preprocessing(
     if processed_df.empty:
         raise HTTPException(status_code=400, detail="Processing resulted in empty dataset. Try different options.")
         
-    # Save processed file
+    # Save processed file(s)
     import time
     timestamp = int(time.time())
-    new_filename = f"processed_{timestamp}_{dataset.filename}"
-    new_filepath = settings.PROCESSED_DIR / new_filename
     
-    try:
-        processed_df.to_csv(new_filepath, index=False)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error saving processed file: {str(e)}")
-    
-    # Create new dataset entry
-    size_bytes = os.path.getsize(new_filepath)
-    row_count, column_count = processed_df.shape
-    
-    new_dataset = models.Dataset(
-        filename=new_filename,
-        filepath=str(new_filepath),
-        size_bytes=size_bytes,
-        row_count=row_count,
-        column_count=column_count,
-        status="Processed",
-        parent_dataset_id=dataset_id  # Link to parent dataset
-    )
-    
-    db.add(new_dataset)
-    db.commit()
-    db.refresh(new_dataset)
-    
-    # Log the action (link to NEW dataset)
-    log = models.ProcessingLog(
-        dataset_id=new_dataset.id,  # Reference the new processed dataset
-        action="preprocessing",
-        parameters=options.dict()
-    )
-    db.add(log)
-    db.commit()
-    
-    return new_dataset
+    if options.train_test_split:
+        from sklearn.model_selection import train_test_split
+        
+        # Split
+        train_df, test_df = train_test_split(
+            processed_df, 
+            test_size=options.test_size, 
+            stratify=processed_df[options.target_column] if options.stratify and options.target_column and options.target_column in processed_df.columns else None,
+            random_state=42
+        )
+        
+        # Save Train
+        train_filename = f"processed_train_{timestamp}_{dataset.filename}"
+        train_filepath = settings.PROCESSED_DIR / train_filename
+        train_df.to_csv(train_filepath, index=False)
+        
+        # Save Test
+        test_filename = f"processed_test_{timestamp}_{dataset.filename}"
+        test_filepath = settings.PROCESSED_DIR / test_filename
+        test_df.to_csv(test_filepath, index=False)
+        
+        # Create Dataset Entry for Train
+        train_dataset = models.Dataset(
+            filename=train_filename,
+            filepath=str(train_filepath),
+            size_bytes=os.path.getsize(train_filepath),
+            row_count=len(train_df),
+            column_count=len(train_df.columns),
+            status="Processed (Train)",
+            parent_dataset_id=dataset_id
+        )
+        db.add(train_dataset)
+        
+        # Create Dataset Entry for Test
+        test_dataset = models.Dataset(
+            filename=test_filename,
+            filepath=str(test_filepath),
+            size_bytes=os.path.getsize(test_filepath),
+            row_count=len(test_df),
+            column_count=len(test_df.columns),
+            status="Processed (Test)",
+            parent_dataset_id=dataset_id
+        )
+        db.add(test_dataset)
+        
+        db.commit()
+        db.refresh(train_dataset)
+        
+        # Log action
+        log = models.ProcessingLog(
+            dataset_id=train_dataset.id,
+            action="preprocessing_split",
+            parameters=options.dict()
+        )
+        db.add(log)
+        db.commit()
+        
+        return train_dataset
+
+    else:
+        # Standard Save
+        new_filename = f"processed_{timestamp}_{dataset.filename}"
+        new_filepath = settings.PROCESSED_DIR / new_filename
+        
+        try:
+            processed_df.to_csv(new_filepath, index=False)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error saving processed file: {str(e)}")
+        
+        # Create new dataset entry
+        size_bytes = os.path.getsize(new_filepath)
+        row_count, column_count = processed_df.shape
+        
+        new_dataset = models.Dataset(
+            filename=new_filename,
+            filepath=str(new_filepath),
+            size_bytes=size_bytes,
+            row_count=row_count,
+            column_count=column_count,
+            status="Processed",
+            parent_dataset_id=dataset_id  # Link to parent dataset
+        )
+        
+        db.add(new_dataset)
+        db.commit()
+        db.refresh(new_dataset)
+        
+        # Log the action (link to NEW dataset)
+        log = models.ProcessingLog(
+            dataset_id=new_dataset.id,  # Reference the new processed dataset
+            action="preprocessing",
+            parameters=options.dict()
+        )
+        db.add(log)
+        db.commit()
+        
+        return new_dataset
 
 
 @router.post("/{dataset_id}/generate-code")

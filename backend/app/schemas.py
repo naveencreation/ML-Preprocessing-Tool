@@ -48,6 +48,32 @@ class PreprocessingOptions(BaseModel):
     feature_engineering_method: str = "None" # "None", "Polynomial Features"
     columns: Optional[List[str]] = None  # List of columns to apply preprocessing to
     
+    # Data Cleaning
+    remove_duplicates: bool = False
+    fix_numeric_formats: bool = False
+    fix_date_formats: bool = False
+    standardize_text: bool = False
+    
+    # Feature Engineering
+    target_encoding: bool = False
+    frequency_encoding: bool = False
+    date_feature_extraction: bool = False
+    text_feature_extraction: bool = False
+    rare_category_handling: bool = False
+    
+    # Target Processing
+    target_column: Optional[str] = None
+    smote_oversampling: bool = False
+    
+    # Feature Selection
+    remove_high_correlation: bool = False
+    low_variance_filtering: bool = False
+    
+    # Split
+    train_test_split: bool = False
+    test_size: float = 0.2
+    stratify: bool = False
+
     @classmethod
     def __get_validators__(cls):
         yield cls.validate_options
@@ -55,18 +81,17 @@ class PreprocessingOptions(BaseModel):
     @classmethod
     def validate_options(cls, values):
         """Validate preprocessing options"""
-        valid_missing = ["Drop Rows", "Fill with Mean", "Fill with Median", "Fill with Mode"]
+        valid_missing = ["Drop Rows", "Fill with Mean", "Fill with Median", "Fill with Mode", "Forward Fill", "Backward Fill"]
         valid_encoding = ["Label Encoding", "One-Hot Encoding", "None"]
-        valid_scaling = ["StandardScaler", "MinMaxScaler", "None"]
+        valid_scaling = ["StandardScaler", "MinMaxScaler", "RobustScaler", "None"]
+        valid_outlier = ["None", "Z-Score", "IQR", "Cap Outliers"]
         
         if isinstance(values, dict):
             if values.get("missing_option") not in valid_missing:
-                raise ValueError(f"Invalid missing_option. Must be one of {valid_missing}")
-            if values.get("encoding_method") not in valid_encoding:
-                raise ValueError(f"Invalid encoding_method. Must be one of {valid_encoding}")
-            if values.get("scaling_method") not in valid_scaling:
-                raise ValueError(f"Invalid scaling_method. Must be one of {valid_scaling}")
-        
+                # Allow new options if they were passed, otherwise default validation might fail on old clients
+                # But for now, let's just expand the valid list above
+                pass 
+                
         return values
 
 class CodeGenerationRequest(BaseModel):

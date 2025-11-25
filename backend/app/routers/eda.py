@@ -47,3 +47,8 @@ def get_boxplot(dataset_id: int, column: str, db: Session = Depends(get_db)):
 def get_correlation(dataset_id: int, db: Session = Depends(get_db)):
     df = get_dataframe(dataset_id, db)
     return eda_service.generate_correlation_matrix(df)
+
+@router.get("/{dataset_id}/quality-report")
+def get_quality_report(dataset_id: int, db: Session = Depends(get_db)):
+    df = get_dataframe(dataset_id, db)
+    return eda_service.get_quality_report(df)
