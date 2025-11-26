@@ -19,7 +19,20 @@ class Settings:
     
     # File Upload Limits
     MAX_UPLOAD_SIZE_MB: int = 100
-    ALLOWED_EXTENSIONS: set = {".csv", ".xlsx", ".xls", ".json"}
+    ALLOWED_EXTENSIONS: set = {
+        # Tabular
+        ".csv", ".xlsx", ".xls", ".sql", 
+        # Text
+        ".txt", ".pdf", ".docx", ".json", 
+        # Image
+        ".jpg", ".png", ".tiff", ".jpeg", ".bmp", ".gif", ".webp",
+        # Audio
+        ".wav", ".mp3", ".flac", ".ogg", ".m4a",
+        # Video
+        ".mp4", ".avi", ".mov", ".mkv", ".webm",
+        # Logs
+        ".log"
+    }
     
     # CORS
     BACKEND_CORS_ORIGINS: list = ["http://localhost:5173", "http://localhost:3000", "http://localhost:5174"]

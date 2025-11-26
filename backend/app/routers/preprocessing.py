@@ -4,7 +4,7 @@ import pandas as pd
 import os
 from app.database import get_db
 from app import models, schemas
-from app.services import data_processing, code_generator
+from app.services import code_generator, notebook_generator, tabular_preprocessing_service, text_preprocessing_service, image_preprocessing_service, audio_preprocessing_service, timeseries_preprocessing_service, log_preprocessing_service
 from app.config import settings
 
 router = APIRouter(
@@ -29,7 +29,17 @@ def apply_preprocessing(
     
     # Load data
     try:
-        df = pd.read_csv(dataset.filepath)
+        if dataset.dataset_type in ["image", "audio"]:
+            # For images and audio, we create a pseudo-dataframe with the filepath
+            df = pd.DataFrame({'filepath': [dataset.filepath]})
+        elif dataset.dataset_type in ["text", "logs"]:
+            # Read text/log file into a DataFrame with one column 'content'
+            with open(dataset.filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                lines = f.readlines()
+            df = pd.DataFrame({'content': [line.strip() for line in lines]})
+        else:
+            # Tabular or default
+            df = pd.read_csv(dataset.filepath)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading file: {str(e)}")
     
@@ -39,37 +49,80 @@ def apply_preprocessing(
         
     # Apply processing
     try:
-        processed_df = data_processing.process_dataframe(
-            df, 
-            options.missing_option, 
-            options.encoding_method, 
-            options.scaling_method,
-            options.outlier_method,
-            options.feature_engineering_method,
-            options.columns,
-            # New Options
-            options.remove_duplicates,
-            options.fix_numeric_formats,
-            options.fix_date_formats,
-            options.standardize_text,
-            options.target_encoding,
-            options.frequency_encoding,
-            options.date_feature_extraction,
-            options.text_feature_extraction,
-            options.rare_category_handling,
-            options.target_column,
-            options.smote_oversampling,
-            options.remove_high_correlation,
-            options.low_variance_filtering
-        )
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Processing failed: {str(e)}")
+        # Route based on dataset type
+        if dataset.dataset_type == "text":
+            processed_df = text_preprocessing_service.process_text_data(
+                df,
+                text_column=options.columns[0] if options.columns else None,
+                text_cleaning_method=options.text_cleaning_method,
+                stopword_removal=options.stopword_removal,
+                stemming=options.stemming,
+                lemmatization=options.lemmatization,
+                tokenization=options.tokenization,
+                vectorization_method=options.vectorization_method,
+                missing_option=options.missing_option
+            )
+        elif dataset.dataset_type == "image":
+            # Image service (saves files, returns df with paths)
+            processed_df = image_preprocessing_service.process_image_data(
+                df,
+                image_column='filepath',
+                image_resize=options.image_resize,
+                image_width=options.image_width,
+                image_height=options.image_height,
+                image_grayscale=options.image_grayscale,
+                image_normalize=options.image_normalize,
+                image_augmentation=options.image_augmentation,
+                missing_option=options.missing_option
+            )
+        elif dataset.dataset_type == "audio":
+            processed_df = audio_preprocessing_service.process_audio_data(
+                df,
+                audio_column='filepath',
+                audio_resample=options.audio_resample,
+                audio_sample_rate=options.audio_sample_rate,
+                audio_trim_silence=options.audio_trim_silence,
+                audio_duration=options.audio_duration,
+                audio_feature_extraction=options.audio_feature_extraction,
+                missing_option=options.missing_option
+            )
+        elif dataset.dataset_type == "timeseries" or (dataset.dataset_type == "tabular" and (options.ts_resample or options.ts_rolling_window or options.ts_lag_features or options.ts_decompose)):
+            processed_df = timeseries_preprocessing_service.process_timeseries_data(
+                df,
+                date_column=options.columns[0] if options.columns else None,
+                ts_resample=options.ts_resample,
+                ts_resample_freq=options.ts_resample_freq,
+                ts_handle_missing=options.ts_handle_missing,
+                ts_rolling_window=options.ts_rolling_window,
+                ts_window_size=options.ts_window_size,
+                ts_lag_features=options.ts_lag_features,
+                ts_lags=options.ts_lags,
+                ts_decompose=options.ts_decompose,
+                columns=options.columns
+            )
+        elif dataset.dataset_type == "logs":
+            processed_df = log_preprocessing_service.process_log_data(
+                df,
+                log_parse_timestamp=options.log_parse_timestamp,
+                log_extract_levels=options.log_extract_levels,
+                log_pattern_extraction=options.log_pattern_extraction,
+                columns=options.columns
+            )
+        else:
+            # Default to tabular
+            processed_df = tabular_preprocessing_service.process_tabular_data(
+                df, 
+                options.missing_option, 
+                options.encoding_method, 
+                options.scaling_method,
+                options.outlier_method,
+                options.columns
+            )
     
-    # Validate processing didn't result in empty dataframe
-    if processed_df.empty:
-        raise HTTPException(status_code=400, detail="Processing resulted in empty dataset. Try different options.")
-        
-    # Save processed file(s)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Preprocessing error: {str(e)}")
+    
+    # Save processed data
     import time
     timestamp = int(time.time())
     
@@ -229,8 +282,17 @@ def get_comparison(dataset_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Parent dataset not found")
     
     try:
-        # Load both datasets
-        original_df = pd.read_csv(parent.filepath)
+        # Load parent dataset based on type
+        if parent.dataset_type in ["text", "logs"]:
+            with open(parent.filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                lines = f.readlines()
+            original_df = pd.DataFrame({'content': [line.strip() for line in lines]})
+        elif parent.dataset_type in ["image", "audio"]:
+             original_df = pd.DataFrame({'filepath': [parent.filepath]})
+        else:
+            original_df = pd.read_csv(parent.filepath)
+
+        # Processed dataset is always saved as CSV
         processed_df = pd.read_csv(dataset.filepath)
         
         # Calculate differences
@@ -261,3 +323,62 @@ def get_comparison(dataset_id: int, db: Session = Depends(get_db)):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error comparing datasets: {str(e)}")
+
+@router.get("/{dataset_id}/logs")
+def get_dataset_logs(dataset_id: int, db: Session = Depends(get_db)):
+    """
+    Get processing logs for a specific dataset.
+    """
+    logs = db.query(models.ProcessingLog).filter(models.ProcessingLog.dataset_id == dataset_id).order_by(models.ProcessingLog.created_at.desc()).all()
+    return logs
+
+
+
+
+@router.get("/logs/all")
+def get_all_logs(limit: int = 100, db: Session = Depends(get_db)):
+    """Get all processing logs across all datasets"""
+    logs = db.query(models.ProcessingLog).order_by(
+        models.ProcessingLog.created_at.desc()
+    ).limit(limit).all()
+    
+    return logs
+
+@router.post("/{dataset_id}/export-notebook")
+def export_notebook(
+    dataset_id: int,
+    options: schemas.PreprocessingOptions,
+    db: Session = Depends(get_db)
+):
+    """Export the preprocessing configuration as a Jupyter notebook."""
+    from fastapi.responses import Response
+    import json
+    
+    # Fetch dataset
+    dataset = db.query(models.Dataset).filter(models.Dataset.id == dataset_id).first()
+    if dataset is None:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    
+    try:
+        # Generate notebook
+        notebook_dict = notebook_generator.generate_notebook(
+            dataset.filename,
+            options.dict()
+        )
+        
+        # Convert to JSON string
+        notebook_json = json.dumps(notebook_dict, indent=2)
+        
+        # Create filename
+        notebook_filename = f"{dataset.filename.replace('.csv', '')}_pipeline.ipynb"
+        
+        # Return as downloadable file
+        return Response(
+            content=notebook_json,
+            media_type="application/x-ipynb+json",
+            headers={
+                "Content-Disposition": f"attachment; filename={notebook_filename}"
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating notebook: {str(e)}")

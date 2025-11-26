@@ -4,84 +4,71 @@
 
 @layer base {
   :root {
-    /* Premium Blue/Teal Palette */
-    --background: 210 20% 98%;
-    --foreground: 215 25% 12%;
+    /* Light Mode - Clean & Scientific */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 12%;
+    --card-foreground: 222 47% 11%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 12%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Primary: Rich Blue */
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary: Science Blue */
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
 
-    /* Secondary: Soft Teal */
-    --secondary: 180 30% 94%;
-    --secondary-foreground: 215 25% 12%;
+    /* Secondary: Soft Teal/Slate */
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11.2%;
 
-    --muted: 210 20% 95%;
-    --muted-foreground: 215 15% 45%;
+    /* Muted: Subtle grays */
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    /* Accent: Vibrant Teal */
+    /* Accent: Vibrant Teal for highlights */
     --accent: 175 60% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 222 47% 11.2%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 214 20% 88%;
-    --input: 214 20% 88%;
-    --ring: 217 91% 60%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221 83% 53%;
 
-    /* Chart Colors: Vibrant & Analytical */
-    --chart-1: 217 91% 60%;
-    /* Blue */
-    --chart-2: 175 60% 50%;
-    /* Teal */
-    --chart-3: 142 71% 45%;
-    /* Green */
-    --chart-4: 262 83% 58%;
-    /* Purple */
-    --chart-5: 346 84% 61%;
-    /* Pink */
-
-    --radius: 0.5rem;
-    --sidebar-width: 16rem;
+    --radius: 0.75rem;
   }
 
   .dark {
+    /* Dark Mode - Deep Space Data */
     --background: 222 47% 11%;
-    --foreground: 210 20% 98%;
-    --card: 222 47% 15%;
-    --card-foreground: 210 20% 98%;
-    --popover: 222 47% 15%;
-    --popover-foreground: 210 20% 98%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 14%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 14%;
+    --popover-foreground: 210 40% 98%;
 
     --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
+    --primary-foreground: 222 47% 11.2%;
 
-    --secondary: 222 47% 20%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 222 47% 20%;
-    --muted-foreground: 215 15% 60%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
     --accent: 175 60% 50%;
-    --accent-foreground: 222 47% 11%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 222 47% 20%;
-    --input: 222 47% 20%;
-    --ring: 217 91% 60%;
-
-    --chart-1: 217 91% 65%;
-    --chart-2: 175 60% 55%;
-    --chart-3: 142 71% 50%;
-    --chart-4: 262 83% 63%;
-    --chart-5: 346 84% 66%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
   }
 }
 
@@ -90,50 +77,64 @@
     @apply border-border;
   }
 
-  html {
-    scroll-behavior: smooth;
-  }
-
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground font-sans antialiased;
   }
 
-  /* Custom Scrollbar */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  /* Typography enhancements */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold tracking-tight;
   }
 
-  ::-webkit-scrollbar-track {
-    @apply bg-muted/30;
+  h1 {
+    @apply text-4xl;
   }
 
-  ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/30 rounded-full;
+  h2 {
+    @apply text-3xl;
   }
 
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/50;
-  }
-
-  /* Focus visible improvements */
-  *:focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  h3 {
+    @apply text-2xl;
   }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
 
   /* Glassmorphism */
   .glass {
-    @apply bg-background/80 backdrop-blur-md border border-border/50;
+    @apply bg-background/70 backdrop-blur-lg border border-white/20 shadow-sm;
   }
 
-  /* Gradient text */
-  .gradient-text {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  .glass-card {
+    @apply bg-card/60 backdrop-blur-md border border-border/50 shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  /* Gradient Text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+  }
+
+  /* Scrollbar */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40 transition-colors;
   }
 }

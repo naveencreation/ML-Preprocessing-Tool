@@ -1,9 +1,17 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import PageHeader from "@/components/PageHeader"
+import { PageHeader } from "@/components/layout/PageHeader"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,23 +19,12 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog"
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+} from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 import {
     Search,
@@ -36,16 +33,17 @@ import {
     Download,
     Trash2,
     Eye,
-    Calendar,
     Database,
     Plus,
-    Pencil
+    LayoutGrid,
+    List,
+    BarChart
 } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import EmptyState from "@/components/EmptyState"
 import { useToast } from "@/hooks/use-toast"
 import { useAppStore } from "@/lib/store"
-import { getDatasets, deleteDataset, downloadDataset, updateDataset } from "@/lib/api"
+import { getDatasets, deleteDataset, downloadDataset } from "@/lib/api"
 import { format } from "date-fns"
 
 interface Dataset {
@@ -66,15 +64,8 @@ export default function Datasets() {
     const [searchQuery, setSearchQuery] = useState("")
     const [datasets, setDatasets] = useState<Dataset[]>([])
     const [isLoading, setIsLoading] = useState(true)
-
-    // Delete Dialog State
-    const [deleteId, setDeleteId] = useState<number | null>(null)
-    const [isDeleting, setIsDeleting] = useState(false)
-
-    // Rename Dialog State
-    const [renameId, setRenameId] = useState<number | null>(null)
-    const [newName, setNewName] = useState("")
-    const [isRenaming, setIsRenaming] = useState(false)
+    const [viewMode, setViewMode] = useState<"grid" | "table">("table")
+    const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null)
 
     useEffect(() => {
         loadDatasets()
@@ -86,6 +77,7 @@ export default function Datasets() {
             const data = await getDatasets()
             setDatasets(data)
         } catch (error) {
+            console.error(error)
             toast({
                 title: "Error",
                 description: "Failed to load datasets",
@@ -109,6 +101,7 @@ export default function Datasets() {
                 description: "Your dataset download has started.",
             })
         } catch (error) {
+            console.error(error)
             toast({
                 title: "Error",
                 description: "Failed to download dataset",
@@ -117,58 +110,22 @@ export default function Datasets() {
         }
     }
 
-    const confirmDelete = (id: number) => {
-        setDeleteId(id)
-    }
-
-    const handleDelete = async () => {
-        if (!deleteId) return
-
+    const handleDelete = async (id: number) => {
         try {
-            setIsDeleting(true)
-            await deleteDataset(deleteId)
-            setDatasets(datasets.filter(d => d.id !== deleteId))
+            await deleteDataset(id)
+            setDatasets(datasets.filter(d => d.id !== id))
+            if (selectedDataset?.id === id) setSelectedDataset(null)
             toast({
                 title: "Dataset Deleted",
-                description: "The dataset and its processed versions have been permanently removed.",
+                description: "The dataset has been permanently removed.",
             })
         } catch (error) {
+            console.error(error)
             toast({
                 title: "Error",
                 description: "Failed to delete dataset",
                 variant: "destructive",
             })
-        } finally {
-            setIsDeleting(false)
-            setDeleteId(null)
-        }
-    }
-
-    const startRename = (dataset: Dataset) => {
-        setRenameId(dataset.id)
-        setNewName(dataset.filename)
-    }
-
-    const handleRename = async () => {
-        if (!renameId || !newName.trim()) return
-
-        try {
-            setIsRenaming(true)
-            const updated = await updateDataset(renameId, { filename: newName })
-            setDatasets(datasets.map(d => d.id === renameId ? updated : d))
-            toast({
-                title: "Dataset Renamed",
-                description: "The dataset has been successfully renamed.",
-            })
-            setRenameId(null)
-        } catch (error) {
-            toast({
-                title: "Error",
-                description: "Failed to rename dataset",
-                variant: "destructive",
-            })
-        } finally {
-            setIsRenaming(false)
         }
     }
 
@@ -186,126 +143,164 @@ export default function Datasets() {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <PageHeader
-                    title="Datasets"
-                    description="Manage your uploaded datasets"
-                />
-                <Button onClick={() => navigate("/upload")} className="gap-2">
+            <PageHeader
+                title="Datasets"
+                description="Manage and analyze your uploaded datasets"
+            >
+                <Button onClick={() => navigate("/upload")} className="gap-2 shadow-lg shadow-primary/20">
                     <Plus className="h-4 w-4" />
                     Upload New
                 </Button>
-            </div>
+            </PageHeader>
 
-            {/* Search and Filter */}
-            <div className="flex items-center gap-4">
-                <div className="relative flex-1 max-w-sm">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            {/* Toolbar */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-card/50 backdrop-blur-sm p-4 rounded-xl border border-border/50">
+                <div className="relative w-full sm:w-96">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Search datasets..."
-                        className="pl-9"
+                        className="pl-9 bg-background/50 border-transparent focus:bg-background transition-all"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
+                <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-lg">
+                    <Button
+                        variant={viewMode === "grid" ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setViewMode("grid")}
+                        className="h-8 w-8 p-0"
+                    >
+                        <LayoutGrid className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant={viewMode === "table" ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setViewMode("table")}
+                        className="h-8 w-8 p-0"
+                    >
+                        <List className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
 
-            {/* Datasets Grid */}
+            {/* Content */}
             {isLoading ? (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
-                        <Card key={i} className="animate-pulse">
-                            <CardHeader className="h-[100px] bg-muted/50" />
-                            <CardContent className="h-[100px] bg-muted/30" />
-                        </Card>
+                        <div key={i} className="h-20 bg-muted/20 rounded-xl animate-pulse" />
                     ))}
                 </div>
             ) : filteredDatasets.length > 0 ? (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {filteredDatasets.map((dataset, index) => (
+                <AnimatePresence mode="wait">
+                    {viewMode === "grid" ? (
                         <motion.div
-                            key={dataset.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1 }}
+                            key="grid"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
                         >
-                            <Card className="group overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
-                                <CardHeader className="relative pb-4">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="rounded-lg bg-primary/10 p-2.5 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                                                <Database className="h-5 w-5" />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <CardTitle className="text-base line-clamp-1" title={dataset.filename}>
-                                                    {dataset.filename}
-                                                </CardTitle>
-                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                    <Calendar className="h-3 w-3" />
-                                                    {format(new Date(dataset.upload_date), "MMM d, yyyy")}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="-mr-2 h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100">
-                                                    <MoreVertical className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => handleView(dataset.id)}>
-                                                    <Eye className="mr-2 h-4 w-4" />
-                                                    View Analysis
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => startRename(dataset)}>
-                                                    <Pencil className="mr-2 h-4 w-4" />
-                                                    Rename
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handleDownload(dataset.id)}>
-                                                    <Download className="mr-2 h-4 w-4" />
-                                                    Download
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    className="text-destructive focus:text-destructive"
-                                                    onClick={() => confirmDelete(dataset.id)}
-                                                >
-                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                    Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
-                                        <div className="space-y-1">
-                                            <p className="text-xs text-muted-foreground">Size</p>
-                                            <p className="font-medium">{formatSize(dataset.size_bytes)}</p>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="text-xs text-muted-foreground">Dimensions</p>
-                                            <p className="font-medium">{dataset.row_count} × {dataset.column_count}</p>
-                                        </div>
-                                    </div>
-                                    <div className="mt-4 flex items-center justify-between border-t pt-4">
-                                        <div className="flex items-center gap-2">
-                                            <Badge variant="secondary" className="text-xs">
-                                                {dataset.row_count} rows
-                                            </Badge>
-                                            <Badge variant={dataset.status === 'Processed' ? 'default' : 'outline'} className="text-xs">
+                            {filteredDatasets.map((dataset) => (
+                                <Card
+                                    key={dataset.id}
+                                    className="group cursor-pointer hover:border-primary/50 transition-all hover:shadow-md"
+                                    onClick={() => setSelectedDataset(dataset)}
+                                >
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium truncate" title={dataset.filename}>
+                                            {dataset.filename}
+                                        </CardTitle>
+                                        <Database className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{dataset.row_count.toLocaleString()}</div>
+                                        <p className="text-xs text-muted-foreground">rows • {formatSize(dataset.size_bytes)}</p>
+                                        <div className="mt-4 flex items-center justify-between">
+                                            <Badge variant={dataset.status === 'Processed' ? 'default' : 'secondary'}>
                                                 {dataset.status}
                                             </Badge>
+                                            <span className="text-xs text-muted-foreground">
+                                                {format(new Date(dataset.upload_date), "MMM d")}
+                                            </span>
                                         </div>
-                                        <Button variant="ghost" size="sm" className="h-8 gap-2 text-xs" onClick={() => handleView(dataset.id)}>
-                                            <FileText className="h-3 w-3" />
-                                            Analyze
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                    </CardContent>
+                                </Card>
+                            ))}
                         </motion.div>
-                    ))}
-                </div>
+                    ) : (
+                        <motion.div
+                            key="table"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden"
+                        >
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="hover:bg-transparent">
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Size</TableHead>
+                                        <TableHead>Dimensions</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredDatasets.map((dataset) => (
+                                        <TableRow
+                                            key={dataset.id}
+                                            className="cursor-pointer hover:bg-muted/30"
+                                            onClick={() => setSelectedDataset(dataset)}
+                                        >
+                                            <TableCell className="font-medium">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                                        <FileText className="h-4 w-4" />
+                                                    </div>
+                                                    {dataset.filename}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{formatSize(dataset.size_bytes)}</TableCell>
+                                            <TableCell>{dataset.row_count.toLocaleString()} × {dataset.column_count}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={dataset.status === 'Processed' ? 'default' : 'secondary'}>
+                                                    {dataset.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground">
+                                                {format(new Date(dataset.upload_date), "MMM d, yyyy")}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                                    <Button variant="ghost" size="icon" onClick={() => handleView(dataset.id)}>
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" size="icon">
+                                                                <MoreVertical className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem onClick={() => handleDownload(dataset.id)}>
+                                                                <Download className="mr-2 h-4 w-4" /> Download
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(dataset.id)}>
+                                                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             ) : (
                 <EmptyState
                     icon={Database}
@@ -318,61 +313,86 @@ export default function Datasets() {
                 />
             )}
 
-            {/* Delete Confirmation Dialog */}
-            <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the dataset
-                            and any processed versions derived from it.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={(e) => {
-                                e.preventDefault()
-                                handleDelete()
-                            }}
-                            disabled={isDeleting}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                            {isDeleting ? "Deleting..." : "Delete"}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            {/* Dataset Details Sheet */}
+            <Sheet open={!!selectedDataset} onOpenChange={() => setSelectedDataset(null)}>
+                <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+                    {selectedDataset && (
+                        <div className="space-y-6">
+                            <SheetHeader>
+                                <SheetTitle className="text-2xl">{selectedDataset.filename}</SheetTitle>
+                                <SheetDescription>
+                                    Uploaded on {format(new Date(selectedDataset.upload_date), "PPP p")}
+                                </SheetDescription>
+                            </SheetHeader>
 
-            {/* Rename Dialog */}
-            <Dialog open={!!renameId} onOpenChange={() => setRenameId(null)}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Rename Dataset</DialogTitle>
-                        <DialogDescription>
-                            Enter a new name for your dataset.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4">
-                        <Input
-                            value={newName}
-                            onChange={(e) => setNewName(e.target.value)}
-                            placeholder="Dataset name"
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleRename()
-                            }}
-                        />
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setRenameId(null)} disabled={isRenaming}>
-                            Cancel
-                        </Button>
-                        <Button onClick={handleRename} disabled={isRenaming || !newName.trim()}>
-                            {isRenaming ? "Renaming..." : "Save Changes"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-sm font-medium text-muted-foreground">Rows</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{selectedDataset.row_count.toLocaleString()}</div>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-sm font-medium text-muted-foreground">Columns</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{selectedDataset.column_count}</div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-semibold flex items-center gap-2">
+                                    <BarChart className="h-5 w-5 text-primary" />
+                                    Quick Actions
+                                </h3>
+                                <div className="grid gap-3">
+                                    <Button className="w-full justify-start gap-3 h-12 text-lg" onClick={() => handleView(selectedDataset.id)}>
+                                        <Eye className="h-5 w-5" />
+                                        Open in Dashboard
+                                    </Button>
+                                    <Button variant="outline" className="w-full justify-start gap-3 h-12" onClick={() => navigate(`/preprocessing/${selectedDataset.id}`)}>
+                                        <Database className="h-5 w-5" />
+                                        Start Preprocessing
+                                    </Button>
+                                    <Button variant="outline" className="w-full justify-start gap-3 h-12" onClick={() => handleDownload(selectedDataset.id)}>
+                                        <Download className="h-5 w-5" />
+                                        Download CSV
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="rounded-xl bg-muted/30 p-4 border border-border/50">
+                                <h4 className="font-medium mb-2 flex items-center gap-2">
+                                    <FileText className="h-4 w-4" />
+                                    File Details
+                                </h4>
+                                <dl className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <dt className="text-muted-foreground">Size</dt>
+                                        <dd className="font-mono">{formatSize(selectedDataset.size_bytes)}</dd>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <dt className="text-muted-foreground">Path</dt>
+                                        <dd className="font-mono truncate max-w-[200px]" title={selectedDataset.filepath}>
+                                            {selectedDataset.filepath}
+                                        </dd>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <dt className="text-muted-foreground">Status</dt>
+                                        <dd>
+                                            <Badge variant="outline">{selectedDataset.status}</Badge>
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </div>
+                        </div>
+                    )}
+                </SheetContent>
+            </Sheet>
         </div>
     )
 }

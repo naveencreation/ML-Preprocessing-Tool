@@ -1,0 +1,237 @@
+content,content_tokens
+you are an ai pair programmer working  on my existing project called mlpreprocessingtool,"['you', 'are', 'an', 'ai', 'pair', 'programmer', 'working', 'on', 'my', 'existing', 'project', 'called', 'mlpreprocessingtool']"
+this app already loads datasets csvexcel and does basic preprocessingeda in a modular way ,"['this', 'app', 'already', 'loads', 'datasets', 'csvexcel', 'and', 'does', 'basic', 'preprocessingeda', 'in', 'a', 'modular', 'way']"
+,[]
+ overall goal,"['overall', 'goal']"
+,[]
+upgrade this app to support an industrylevel data preprocessing pipeline for tabular datasets in a way that,"['upgrade', 'this', 'app', 'to', 'support', 'an', 'industrylevel', 'data', 'preprocessing', 'pipeline', 'for', 'tabular', 'datasets', 'in', 'a', 'way', 'that']"
+,[]
+keeps all existing functionality working no breaking changes,"['keeps', 'all', 'existing', 'functionality', 'working', 'no', 'breaking', 'changes']"
+,[]
+adds missing preprocessing steps only if they are not already implemented,"['adds', 'missing', 'preprocessing', 'steps', 'only', 'if', 'they', 'are', 'not', 'already', 'implemented']"
+,[]
+organizes the preprocessing steps in a clear logical order like a real ml production pipeline,"['organizes', 'the', 'preprocessing', 'steps', 'in', 'a', 'clear', 'logical', 'order', 'like', 'a', 'real', 'ml', 'production', 'pipeline']"
+,[]
+teaches the user while they use it,"['teaches', 'the', 'user', 'while', 'they', 'use', 'it']"
+,[]
+for every step show what the step does why it is needed and why it comes after the previous step,"['for', 'every', 'step', 'show', 'what', 'the', 'step', 'does', 'why', 'it', 'is', 'needed', 'and', 'why', 'it', 'comes', 'after', 'the', 'previous', 'step']"
+,[]
+the ui should feel like an interactive tutorial  practical tool,"['the', 'ui', 'should', 'feel', 'like', 'an', 'interactive', 'tutorial', 'practical', 'tool']"
+,[]
+do not blindly refactor or optimize everything,"['do', 'not', 'blindly', 'refactor', 'or', 'optimize', 'everything']"
+only change code where necessary to add features improve structure or cleanly integrate the pipeline,"['only', 'change', 'code', 'where', 'necessary', 'to', 'add', 'features', 'improve', 'structure', 'or', 'cleanly', 'integrate', 'the', 'pipeline']"
+,[]
+ context about the app,"['context', 'about', 'the', 'app']"
+,[]
+app type streamlit,"['app', 'type', 'streamlit']"
+,[]
+structure modular indexpy as entry point separate pagesmodules for features eg upload preprocessing eda etc,"['structure', 'modular', 'indexpy', 'as', 'entry', 'point', 'separate', 'pagesmodules', 'for', 'features', 'eg', 'upload', 'preprocessing', 'eda', 'etc']"
+,[]
+goal let users upload a dataset and perform mlready preprocessing,"['goal', 'let', 'users', 'upload', 'a', 'dataset', 'and', 'perform', 'mlready', 'preprocessing']"
+,[]
+when you explore the repo,"['when', 'you', 'explore', 'the', 'repo']"
+,[]
+first scan the existing modules and understand what is already implemented upload missing values encoding scaling etc,"['first', 'scan', 'the', 'existing', 'modules', 'and', 'understand', 'what', 'is', 'already', 'implemented', 'upload', 'missing', 'values', 'encoding', 'scaling', 'etc']"
+,[]
+then map my current functionality to the desired pipeline below,"['then', 'map', 'my', 'current', 'functionality', 'to', 'the', 'desired', 'pipeline', 'below']"
+,[]
+finally add missing pieces  improve ux around the pipeline and explanations,"['finally', 'add', 'missing', 'pieces', 'improve', 'ux', 'around', 'the', 'pipeline', 'and', 'explanations']"
+,[]
+ target pipeline what you must implement,"['target', 'pipeline', 'what', 'you', 'must', 'implement']"
+,[]
+implement  organize the following industrylevel preprocessing steps for tabular data in this order,"['implement', 'organize', 'the', 'following', 'industrylevel', 'preprocessing', 'steps', 'for', 'tabular', 'data', 'in', 'this', 'order']"
+if some steps already exist reuse them and only improve or reorganize the ui,"['if', 'some', 'steps', 'already', 'exist', 'reuse', 'them', 'and', 'only', 'improve', 'or', 'reorganize', 'the', 'ui']"
+,[]
+data ingestion  schema standardization,"['data', 'ingestion', 'schema', 'standardization']"
+,[]
+dataset upload csvexcel already exists  reuse,"['dataset', 'upload', 'csvexcel', 'already', 'exists', 'reuse']"
+,[]
+show schema column names data types shape,"['show', 'schema', 'column', 'names', 'data', 'types', 'shape']"
+,[]
+enforce consistent datatypes where possible intfloatstrbooldatetime,"['enforce', 'consistent', 'datatypes', 'where', 'possible', 'intfloatstrbooldatetime']"
+,[]
+data quality checks,"['data', 'quality', 'checks']"
+,[]
+missing values overview per column  missing,"['missing', 'values', 'overview', 'per', 'column', 'missing']"
+,[]
+duplicate records count,"['duplicate', 'records', 'count']"
+,[]
+basic range checks for numerical columns min max,"['basic', 'range', 'checks', 'for', 'numerical', 'columns', 'min', 'max']"
+,[]
+type validation eg numeric columns with text noise,"['type', 'validation', 'eg', 'numeric', 'columns', 'with', 'text', 'noise']"
+,[]
+show this in a clear data quality summary panel,"['show', 'this', 'in', 'a', 'clear', 'data', 'quality', 'summary', 'panel']"
+,[]
+data cleaning,"['data', 'cleaning']"
+,[]
+missing value handling,"['missing', 'value', 'handling']"
+,[]
+options drop rowscolumns meanmedianmode imputation forwardbackward fill,"['options', 'drop', 'rowscolumns', 'meanmedianmode', 'imputation', 'forwardbackward', 'fill']"
+,[]
+duplicate handling,"['duplicate', 'handling']"
+,[]
+show duplicates allow user to remove them,"['show', 'duplicates', 'allow', 'user', 'to', 'remove', 'them']"
+,[]
+inconsistency fixing,"['inconsistency', 'fixing']"
+,[]
+standardize category labels eg malemalemale,"['standardize', 'category', 'labels', 'eg', 'malemalemale']"
+,[]
+strip whitespace fix casing for string columns,"['strip', 'whitespace', 'fix', 'casing', 'for', 'string', 'columns']"
+,[]
+outlier processing,"['outlier', 'processing']"
+,[]
+detect outliers using simple iqr method at least,"['detect', 'outliers', 'using', 'simple', 'iqr', 'method', 'at', 'least']"
+,[]
+show which columns and how many outliers,"['show', 'which', 'columns', 'and', 'how', 'many', 'outliers']"
+,[]
+give user options remove cap or keep,"['give', 'user', 'options', 'remove', 'cap', 'or', 'keep']"
+,[]
+feature engineering,"['feature', 'engineering']"
+,[]
+categorical features,"['categorical', 'features']"
+,[]
+options onehot encoding label encoding show when to use which,"['options', 'onehot', 'encoding', 'label', 'encoding', 'show', 'when', 'to', 'use', 'which']"
+,[]
+numerical features,"['numerical', 'features']"
+,[]
+options standard scaling minmax scaling robust scaling,"['options', 'standard', 'scaling', 'minmax', 'scaling', 'robust', 'scaling']"
+,[]
+date  time features,"['date', 'time', 'features']"
+,[]
+if datetime columns exist extract year month day weekday etc,"['if', 'datetime', 'columns', 'exist', 'extract', 'year', 'month', 'day', 'weekday', 'etc']"
+,[]
+text features optional,"['text', 'features', 'optional']"
+,[]
+if text columns present mark them and suggest separate text preprocessing or basic cleaning no need to implement full nlp,"['if', 'text', 'columns', 'present', 'mark', 'them', 'and', 'suggest', 'separate', 'text', 'preprocessing', 'or', 'basic', 'cleaning', 'no', 'need', 'to', 'implement', 'full', 'nlp']"
+,[]
+target variable processing,"['target', 'variable', 'processing']"
+,[]
+let user select which column is the target,"['let', 'user', 'select', 'which', 'column', 'is', 'the', 'target']"
+,[]
+for classification handle label encoding,"['for', 'classification', 'handle', 'label', 'encoding']"
+,[]
+for imbalanced classes show class distribution  information about smoteoversampling you may add it as a future feature or simple toggle if easy,"['for', 'imbalanced', 'classes', 'show', 'class', 'distribution', 'information', 'about', 'smoteoversampling', 'you', 'may', 'add', 'it', 'as', 'a', 'future', 'feature', 'or', 'simple', 'toggle', 'if', 'easy']"
+,[]
+feature selection basic,"['feature', 'selection', 'basic']"
+,[]
+show correlation matrix for numerical features,"['show', 'correlation', 'matrix', 'for', 'numerical', 'features']"
+,[]
+let user optionally drop highly correlated features above a threshold,"['let', 'user', 'optionally', 'drop', 'highly', 'correlated', 'features', 'above', 'a', 'threshold']"
+,[]
+allow dropping constantlowvariance features,"['allow', 'dropping', 'constantlowvariance', 'features']"
+,[]
+traintest split,"['traintest', 'split']"
+,[]
+let user choose test size eg slider,"['let', 'user', 'choose', 'test', 'size', 'eg', 'slider']"
+,[]
+for classification support stratified split,"['for', 'classification', 'support', 'stratified', 'split']"
+,[]
+for timeseries if datetime exists show a note about timebased splitting and if feasible provide simple chronological split,"['for', 'timeseries', 'if', 'datetime', 'exists', 'show', 'a', 'note', 'about', 'timebased', 'splitting', 'and', 'if', 'feasible', 'provide', 'simple', 'chronological', 'split']"
+,[]
+export  reproducibility,"['export', 'reproducibility']"
+,[]
+allow user to,"['allow', 'user', 'to']"
+,[]
+download the processed dataset as csv,"['download', 'the', 'processed', 'dataset', 'as', 'csv']"
+,[]
+see a summary of chosen preprocessing settings like a preprocessing report,"['see', 'a', 'summary', 'of', 'chosen', 'preprocessing', 'settings', 'like', 'a', 'preprocessing', 'report']"
+,[]
+keep this simple but clear,"['keep', 'this', 'simple', 'but', 'clear']"
+,[]
+ ux  ui requirements very important,"['ux', 'ui', 'requirements', 'very', 'important']"
+,[]
+this app should teach the user stepbystep while they preprocess update the ui accordingly,"['this', 'app', 'should', 'teach', 'the', 'user', 'stepbystep', 'while', 'they', 'preprocess', 'update', 'the', 'ui', 'accordingly']"
+,[]
+organize the preprocessing ui as a stepper  wizard or clearly separated sections in order,"['organize', 'the', 'preprocessing', 'ui', 'as', 'a', 'stepper', 'wizard', 'or', 'clearly', 'separated', 'sections', 'in', 'order']"
+,[]
+1 data ingestion,"['1', 'data', 'ingestion']"
+,[]
+2 data quality,"['2', 'data', 'quality']"
+,[]
+3 cleaning,"['3', 'cleaning']"
+,[]
+4 feature engineering,"['4', 'feature', 'engineering']"
+,[]
+5 target  imbalance,"['5', 'target', 'imbalance']"
+,[]
+6 feature selection,"['6', 'feature', 'selection']"
+,[]
+7 traintest split,"['7', 'traintest', 'split']"
+,[]
+8 export,"['8', 'export']"
+,[]
+for each step add,"['for', 'each', 'step', 'add']"
+,[]
+a short title eg step 3 data cleaning  fix missing values  outliers,"['a', 'short', 'title', 'eg', 'step', '3', 'data', 'cleaning', 'fix', 'missing', 'values', 'outliers']"
+,[]
+a short paragraph,"['a', 'short', 'paragraph']"
+,[]
+what this step does,"['what', 'this', 'step', 'does']"
+,[]
+why it is important,"['why', 'it', 'is', 'important']"
+,[]
+why it comes after the previous step,"['why', 'it', 'comes', 'after', 'the', 'previous', 'step']"
+,[]
+use small info boxes stinfo stwarning etc to explain best practices,"['use', 'small', 'info', 'boxes', 'stinfo', 'stwarning', 'etc', 'to', 'explain', 'best', 'practices']"
+,[]
+keep the design,"['keep', 'the', 'design']"
+,[]
+clean and minimal,"['clean', 'and', 'minimal']"
+,[]
+consistent spacing and headings,"['consistent', 'spacing', 'and', 'headings']"
+,[]
+easy to follow from top to bottom like a guided flow,"['easy', 'to', 'follow', 'from', 'top', 'to', 'bottom', 'like', 'a', 'guided', 'flow']"
+,[]
+wherever a user chooses an option eg imputation strategy encoding type scaling method briefly explain,"['wherever', 'a', 'user', 'chooses', 'an', 'option', 'eg', 'imputation', 'strategy', 'encoding', 'type', 'scaling', 'method', 'briefly', 'explain']"
+,[]
+when that option is preferred,"['when', 'that', 'option', 'is', 'preferred']"
+,[]
+possible tradeoffs,"['possible', 'tradeoffs']"
+,[]
+ implementation guidelines,"['implementation', 'guidelines']"
+,[]
+do not remove existing features unless they are clearly redundant or broken,"['do', 'not', 'remove', 'existing', 'features', 'unless', 'they', 'are', 'clearly', 'redundant', 'or', 'broken']"
+,[]
+prefer extending current modules instead of rewriting everything,"['prefer', 'extending', 'current', 'modules', 'instead', 'of', 'rewriting', 'everything']"
+,[]
+if large refactors are required,"['if', 'large', 'refactors', 'are', 'required']"
+,[]
+first organize code into clear functions for each preprocessing step,"['first', 'organize', 'code', 'into', 'clear', 'functions', 'for', 'each', 'preprocessing', 'step']"
+,[]
+keep names descriptive eg handle_missing_values encode_categorical_features etc,"['keep', 'names', 'descriptive', 'eg', 'handle_missing_values', 'encode_categorical_features', 'etc']"
+,[]
+avoid overoptimization focus on clarity modularity and correctness,"['avoid', 'overoptimization', 'focus', 'on', 'clarity', 'modularity', 'and', 'correctness']"
+,[]
+make sure all transformations are applied to a central dataframe in a clear traceable flow,"['make', 'sure', 'all', 'transformations', 'are', 'applied', 'to', 'a', 'central', 'dataframe', 'in', 'a', 'clear', 'traceable', 'flow']"
+,[]
+ensure that the user can see intermediate results after major steps eg cleaned data preview encoded data preview,"['ensure', 'that', 'the', 'user', 'can', 'see', 'intermediate', 'results', 'after', 'major', 'steps', 'eg', 'cleaned', 'data', 'preview', 'encoded', 'data', 'preview']"
+,[]
+ deliverables  what i expect you to do,"['deliverables', 'what', 'i', 'expect', 'you', 'to', 'do']"
+,[]
+scan the current repo and identify,"['scan', 'the', 'current', 'repo', 'and', 'identify']"
+,[]
+which preprocessing steps already exist,"['which', 'preprocessing', 'steps', 'already', 'exist']"
+,[]
+which are missing,"['which', 'are', 'missing']"
+,[]
+update or create,"['update', 'or', 'create']"
+,[]
+a main preprocessing page or flow that follows the step order above,"['a', 'main', 'preprocessing', 'page', 'or', 'flow', 'that', 'follows', 'the', 'step', 'order', 'above']"
+,[]
+helper functions for each step,"['helper', 'functions', 'for', 'each', 'step']"
+,[]
+ui components that explain each step whatwhywhyafterprevious,"['ui', 'components', 'that', 'explain', 'each', 'step', 'whatwhywhyafterprevious']"
+,[]
+ensure,['ensure']
+,[]
+the user can go through the entire pipeline from upload  export,"['the', 'user', 'can', 'go', 'through', 'the', 'entire', 'pipeline', 'from', 'upload', 'export']"
+,[]
+each step feels like a minitutorial,"['each', 'step', 'feels', 'like', 'a', 'minitutorial']"
+,[]
+existing workflows still work no broken pages,"['existing', 'workflows', 'still', 'work', 'no', 'broken', 'pages']"
+,[]
+after changes,"['after', 'changes']"
+,[]
+clean up unused code if any,"['clean', 'up', 'unused', 'code', 'if', 'any']"
+,[]
+keep everything readable and maintainable,"['keep', 'everything', 'readable', 'and', 'maintainable']"

@@ -9,12 +9,15 @@ export const api = axios.create({
     },
 });
 
-export const uploadDataset = async (file: File) => {
+export const uploadDataset = async (file: File, datasetType?: string) => {
     const formData = new FormData();
     formData.append('file', file);
+    if (datasetType) {
+        formData.append('dataset_type', datasetType);
+    }
     const response = await api.post('/datasets/upload', formData, {
         headers: {
-            'Content-Type': 'multipart/form-data', // This will be auto-set by browser with boundary
+            'Content-Type': 'multipart/form-data',
         },
     });
     return response.data;
@@ -24,6 +27,12 @@ export const getDatasets = async () => {
     const response = await api.get('/datasets/');
     return response.data;
 };
+
+export const getDataset = async (id: number) => {
+    const response = await api.get(`/datasets/${id}`);
+    return response.data;
+};
+
 
 
 
@@ -89,6 +98,11 @@ export const getEDAStats = async (id: number) => {
     return response.data;
 };
 
+export const getSmartInsights = async (id: number) => {
+    const response = await api.get(`/eda/${id}/insights`);
+    return response.data;
+};
+
 export const getHistogram = async (id: number, column: string) => {
     const response = await api.get(`/eda/${id}/histogram`, { params: { column } });
     return response.data;
@@ -139,5 +153,10 @@ export const getTemplates = async () => {
 
 export const deleteTemplate = async (id: number) => {
     const response = await api.delete(`/workflows/${id}`);
+    return response.data;
+};
+
+export const getAllLogs = async () => {
+    const response = await api.get('/preprocessing/logs/all');
     return response.data;
 };

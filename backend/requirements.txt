@@ -12,3 +12,7 @@ plotly
 python-dotenv
 imbalanced-learn
 category_encoders
+nltk
+Pillow
+librosa
+soundfile

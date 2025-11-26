@@ -15,6 +15,7 @@ class Dataset(Base):
     row_count = Column(Integer)
     column_count = Column(Integer)
     status = Column(String, default="Uploaded")
+    dataset_type = Column(String, default="tabular") # tabular, text, image, audio, timeseries, logs
     
     # Parent-child relationship for dataset lineage
     parent_dataset_id = Column(Integer, ForeignKey("datasets.id"), nullable=True)

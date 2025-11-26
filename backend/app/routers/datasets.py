@@ -9,6 +9,7 @@ import pandas as pd
 from app.database import get_db
 from app import models, schemas
 from app.config import settings
+from app.services import dataset_service
 
 router = APIRouter(
     prefix="/datasets",
@@ -17,89 +18,7 @@ router = APIRouter(
 
 @router.post("/upload", response_model=schemas.Dataset)
 def upload_dataset(file: UploadFile = File(...), db: Session = Depends(get_db)):
-    # Validate file extension
-    file_ext = Path(file.filename).suffix.lower()
-    if file_ext not in settings.ALLOWED_EXTENSIONS:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Invalid file type. Only {', '.join(settings.ALLOWED_EXTENSIONS)} files are allowed."
-        )
-    
-    # Read file content to check size
-    file_content = file.file.read()
-    file_size_mb = len(file_content) / (1024 * 1024)
-    
-    if file_size_mb > settings.MAX_UPLOAD_SIZE_MB:
-        raise HTTPException(
-            status_code=400,
-            detail=f"File size ({file_size_mb:.2f}MB) exceeds maximum allowed size ({settings.MAX_UPLOAD_SIZE_MB}MB)"
-        )
-    
-    # Reset file pointer and save
-    file.file.seek(0)
-    
-    # Original filename and location
-    original_filename = file.filename
-    temp_location = settings.UPLOAD_DIR / original_filename
-    
-    try:
-        # Save uploaded file temporarily
-        with open(temp_location, "wb") as buffer:
-            buffer.write(file_content)
-        
-        # Determine how to read the file
-        if file_ext in ['.xlsx', '.xls']:
-            df = pd.read_excel(temp_location)
-            # Convert to CSV filename
-            csv_filename = Path(original_filename).stem + ".csv"
-            final_location = settings.UPLOAD_DIR / csv_filename
-            # Save as CSV
-            df.to_csv(final_location, index=False)
-            # Remove original excel file to save space/confusion? 
-            # For now, let's keep it or remove it. Let's remove it to keep storage clean.
-            os.remove(temp_location)
-            
-        elif file_ext == '.json':
-            df = pd.read_json(temp_location)
-            csv_filename = Path(original_filename).stem + ".csv"
-            final_location = settings.UPLOAD_DIR / csv_filename
-            df.to_csv(final_location, index=False)
-            os.remove(temp_location)
-            
-        else: # CSV
-            df = pd.read_csv(temp_location)
-            csv_filename = original_filename
-            final_location = temp_location
-            
-        # Get file stats from the FINAL CSV file
-        size_bytes = os.path.getsize(final_location)
-        row_count, column_count = df.shape
-        
-        db_dataset = models.Dataset(
-            filename=csv_filename, # Store as CSV filename
-            filepath=str(final_location),
-            size_bytes=size_bytes,
-            row_count=row_count,
-            column_count=column_count,
-            status="Uploaded",
-            parent_dataset_id=None
-        )
-        
-        db.add(db_dataset)
-        db.commit()
-        db.refresh(db_dataset)
-        
-        return db_dataset
-        
-    except Exception as e:
-        # Clean up files on error
-        if os.path.exists(temp_location):
-            os.remove(temp_location)
-        # If we created a csv but failed later
-        if 'final_location' in locals() and os.path.exists(final_location) and final_location != temp_location:
-            os.remove(final_location)
-    
-        raise HTTPException(status_code=400, detail=f"Error processing file: {str(e)}")
+    return dataset_service.handle_file_upload(file, db)
 
 @router.get("/", response_model=List[schemas.Dataset])
 def list_datasets(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
@@ -114,15 +33,133 @@ def get_dataset(dataset_id: int, db: Session = Depends(get_db)):
     return dataset
 
 @router.get("/{dataset_id}/preview")
-def preview_dataset(dataset_id: int, rows: int = 5, db: Session = Depends(get_db)):
+def preview_dataset(
+    dataset_id: int, 
+    page: int = 1,
+    page_size: int = 100,
+    sort_by: str = None,
+    sort_order: str = "asc",
+    db: Session = Depends(get_db)
+):
+    """
+    Get a paginated preview of the dataset with optional sorting.
+    
+    Args:
+        dataset_id: ID of the dataset
+        page: Page number (1-indexed)
+        page_size: Number of rows per page
+        sort_by: Column name to sort by (optional)
+        sort_order: 'asc' or 'desc'
+    """
     dataset = db.query(models.Dataset).filter(models.Dataset.id == dataset_id).first()
     if dataset is None:
         raise HTTPException(status_code=404, detail="Dataset not found")
+    
+    try:
+        # Handle different dataset types
+        if dataset.dataset_type == "tabular" or not dataset.dataset_type:
+            df = pd.read_csv(dataset.filepath)
+            total_rows = len(df)
+            total_pages = (total_rows + page_size - 1) // page_size  # Ceiling division
+            
+            # Validate page number
+            if page < 1:
+                page = 1
+            if page > total_pages:
+                page = total_pages
+            
+            # Apply sorting if specified
+            if sort_by and sort_by in df.columns:
+                ascending = (sort_order.lower() == "asc")
+                df = df.sort_values(by=sort_by, ascending=ascending)
+            
+            # Calculate pagination
+            start_idx = (page - 1) * page_size
+            end_idx = start_idx + page_size
+            
+            # Get page data
+            page_data = df.iloc[start_idx:end_idx].copy()
+            
+            # Replace NaN with None for JSON compatibility
+            page_data = page_data.where(pd.notnull(page_data), None)
+            
+            return {
+                "data": page_data.to_dict(orient="records"),
+                "pagination": {
+                    "page": page,
+                    "page_size": page_size,
+                    "total_rows": total_rows,
+                    "total_pages": total_pages,
+                    "has_next": page < total_pages,
+                    "has_prev": page > 1
+                },
+                "columns": df.columns.tolist(),
+                "dtypes": df.dtypes.astype(str).to_dict(),
+                "dataset_type": dataset.dataset_type
+            }
         
-    df = pd.read_csv(dataset.filepath)
-    # Replace NaN with None for JSON compatibility
-    df = df.where(pd.notnull(df), None)
-    return df.head(rows).to_dict(orient="records")
+        elif dataset.dataset_type in ["text", "logs"]:
+            # Read first N lines for text/logs
+            lines = []
+            total_rows = 0
+            with open(dataset.filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                # Count total lines (might be expensive for huge files, but okay for now)
+                # For preview, maybe just read a chunk
+                all_lines = f.readlines()
+                total_rows = len(all_lines)
+                
+            total_pages = (total_rows + page_size - 1) // page_size
+            
+            if page < 1: page = 1
+            if page > total_pages: page = total_pages
+            
+            start_idx = (page - 1) * page_size
+            end_idx = start_idx + page_size
+            
+            page_lines = all_lines[start_idx:end_idx]
+            
+            # Format as a single column dataframe-like structure
+            data = [{"line_number": start_idx + i + 1, "content": line.strip()} for i, line in enumerate(page_lines)]
+            
+            return {
+                "data": data,
+                "pagination": {
+                    "page": page,
+                    "page_size": page_size,
+                    "total_rows": total_rows,
+                    "total_pages": total_pages,
+                    "has_next": page < total_pages,
+                    "has_prev": page > 1
+                },
+                "columns": ["line_number", "content"],
+                "dtypes": {"line_number": "int", "content": "str"},
+                "dataset_type": dataset.dataset_type
+            }
+            
+        else:
+            # Image/Audio/Video - just return metadata
+            return {
+                "data": [],
+                "pagination": {
+                    "page": 1,
+                    "page_size": page_size,
+                    "total_rows": 0,
+                    "total_pages": 1,
+                    "has_next": False,
+                    "has_prev": False
+                },
+                "columns": [],
+                "dtypes": {},
+                "dataset_type": dataset.dataset_type,
+                "message": f"Preview not available for {dataset.dataset_type} data"
+            }
+
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Dataset file not found on server")
+    except pd.errors.EmptyDataError:
+        raise HTTPException(status_code=400, detail="Dataset file is empty")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading dataset: {str(e)}")
 
 @router.delete("/{dataset_id}")
 def delete_dataset(dataset_id: int, db: Session = Depends(get_db)):

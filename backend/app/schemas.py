@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional, Dict, Any
+from enum import Enum
 
 class ProcessingLogBase(BaseModel):
     action: str
@@ -40,13 +41,41 @@ class Dataset(DatasetBase):
     class Config:
         from_attributes = True
 
+class MissingValueOption(str, Enum):
+    DROP_ROWS = "Drop Rows"
+    MEAN = "Mean"
+    MEDIAN = "Median"
+    MODE = "Mode"
+    CONSTANT = "Constant"
+    NONE = "None"
+    FORWARD_FILL = "Forward Fill"
+    BACKWARD_FILL = "Backward Fill"
+    KNN = "KNN Imputation"
+    ITERATIVE = "Iterative Imputation"
+
+class EncodingOption(str, Enum):
+    NONE = "None"
+    LABEL = "Label Encoding"
+    ONE_HOT = "One-Hot Encoding"
+    FREQUENCY = "Frequency Encoding"
+
+class ScalingOption(str, Enum):
+    NONE = "None"
+    STANDARD = "StandardScaler"
+    MIN_MAX = "MinMaxScaler"
+    ROBUST = "RobustScaler"
+
 class PreprocessingOptions(BaseModel):
-    missing_option: str  # "Drop Rows", "Fill with Mean", "Fill with Median", "Fill with Mode"
-    encoding_method: str # "Label Encoding", "One-Hot Encoding"
-    scaling_method: str  # "StandardScaler", "MinMaxScaler", "None"
+    # General
+    missing_option: MissingValueOption = MissingValueOption.DROP_ROWS
+    columns: Optional[List[str]] = None
+    target_column: Optional[str] = None
+    
+    # Tabular Specific
+    encoding_method: EncodingOption = EncodingOption.NONE
+    scaling_method: ScalingOption = ScalingOption.NONE
     outlier_method: str = "None" # "None", "Z-Score", "IQR"
     feature_engineering_method: str = "None" # "None", "Polynomial Features"
-    columns: Optional[List[str]] = None  # List of columns to apply preprocessing to
     
     # Data Cleaning
     remove_duplicates: bool = False
@@ -61,13 +90,51 @@ class PreprocessingOptions(BaseModel):
     text_feature_extraction: bool = False
     rare_category_handling: bool = False
     
+    # Text Specific
+    text_cleaning_method: str = "None" # "None", "Simple", "Advanced"
+    stopword_removal: bool = False
+    stemming: bool = False
+    lemmatization: bool = False
+    tokenization: bool = False
+    vectorization_method: str = "None" # "None", "TF-IDF", "Count", "Word2Vec"
+
+    # Image Specific
+    image_resize: bool = False
+    image_width: int = 224
+    image_height: int = 224
+    image_grayscale: bool = False
+    image_normalize: bool = False # 0-255 -> 0-1
+    image_augmentation: bool = False # Basic rotation/flipping
+
+    # Audio Specific
+    audio_resample: bool = False
+    audio_sample_rate: int = 16000
+    audio_trim_silence: bool = False
+    audio_duration: float = 0.0 # 0 means no trimming
+    audio_feature_extraction: str = "None" # "None", "MFCC", "Spectrogram", "Chroma"
+    
+    # Time-Series Specific
+    ts_resample: bool = False
+    ts_resample_freq: str = "D" # D, H, T, etc.
+    ts_handle_missing: str = "Forward Fill" # Forward Fill, Backward Fill, Interpolate
+    ts_rolling_window: bool = False
+    ts_window_size: int = 3
+    ts_lag_features: bool = False
+    ts_lags: int = 1
+    ts_decompose: bool = False # Trend, Seasonality, Residual
+
+    # Log Specific
+    log_parse_timestamp: bool = False
+    log_extract_levels: bool = False # INFO, ERROR, etc.
+    log_pattern_extraction: str = "" # Regex pattern
+
     # Target Processing
-    target_column: Optional[str] = None
     smote_oversampling: bool = False
     
     # Feature Selection
     remove_high_correlation: bool = False
     low_variance_filtering: bool = False
+    feature_selection_method: str = "None" # "None", "Mutual Information"
     
     # Split
     train_test_split: bool = False
@@ -81,17 +148,8 @@ class PreprocessingOptions(BaseModel):
     @classmethod
     def validate_options(cls, values):
         """Validate preprocessing options"""
-        valid_missing = ["Drop Rows", "Fill with Mean", "Fill with Median", "Fill with Mode", "Forward Fill", "Backward Fill"]
-        valid_encoding = ["Label Encoding", "One-Hot Encoding", "None"]
-        valid_scaling = ["StandardScaler", "MinMaxScaler", "RobustScaler", "None"]
-        valid_outlier = ["None", "Z-Score", "IQR", "Cap Outliers"]
-        
-        if isinstance(values, dict):
-            if values.get("missing_option") not in valid_missing:
-                # Allow new options if they were passed, otherwise default validation might fail on old clients
-                # But for now, let's just expand the valid list above
-                pass 
-                
+        # Pydantic will handle Enum validation automatically for the typed fields.
+        # We can keep this for other fields if needed, or remove it if Enums cover everything.
         return values
 
 class CodeGenerationRequest(BaseModel):

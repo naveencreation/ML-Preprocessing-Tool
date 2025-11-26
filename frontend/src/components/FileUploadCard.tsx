@@ -11,6 +11,7 @@ interface FileUploadCardProps {
     uploadProgress?: number
     isUploading?: boolean
     error?: string | null
+    accept?: Record<string, string[]>
 }
 
 export default function FileUploadCard({
@@ -19,6 +20,12 @@ export default function FileUploadCard({
     uploadProgress = 0,
     isUploading = false,
     error = null,
+    accept = {
+        "text/csv": [".csv"],
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+        "application/vnd.ms-excel": [".xls"],
+        "application/json": [".json"]
+    }
 }: FileUploadCardProps) {
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
@@ -36,12 +43,7 @@ export default function FileUploadCard({
     const { getRootProps, getInputProps, isDragActive, fileRejections } =
         useDropzone({
             onDrop,
-            accept: {
-                "text/csv": [".csv"],
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
-                "application/vnd.ms-excel": [".xls"],
-                "application/json": [".json"]
-            },
+            accept,
             maxSize,
             multiple: false,
         })
