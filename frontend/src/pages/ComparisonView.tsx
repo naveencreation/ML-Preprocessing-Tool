@@ -5,9 +5,11 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ArrowRight, Loader2, TrendingDown, TrendingUp, Plus, Minus } from "lucide-react"
 import { motion } from "framer-motion"
-import { getDatasetComparison } from "@/lib/api"
+import { downloadDataset, exportNotebook, getDatasetComparison, getDatasetLogs } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 import PageHeader from "@/components/PageHeader"
+import { Button } from "@/components/ui/button"
+import { Download, FileCode } from "lucide-react"
 
 interface ComparisonData {
     original: {
@@ -37,6 +39,7 @@ export default function ComparisonView() {
     const { toast } = useToast()
     const [loading, setLoading] = useState(true)
     const [comparison, setComparison] = useState<ComparisonData | null>(null)
+    const [logs, setLogs] = useState<any[]>([])
 
     useEffect(() => {
         if (id) {
@@ -47,8 +50,12 @@ export default function ComparisonView() {
     const loadComparison = async (datasetId: number) => {
         setLoading(true)
         try {
-            const data = await getDatasetComparison(datasetId)
-            setComparison(data)
+            const [compData, logData] = await Promise.all([
+                getDatasetComparison(datasetId),
+                getDatasetLogs(datasetId)
+            ])
+            setComparison(compData)
+            setLogs(logData)
         } catch (error: any) {
             console.error("Failed to load comparison", error)
             toast({
@@ -58,6 +65,45 @@ export default function ComparisonView() {
             })
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handleDownload = () => {
+        if (id) {
+            downloadDataset(parseInt(id))
+            toast({
+                title: "Download started",
+                description: "Your processed dataset is downloading...",
+            })
+        }
+    }
+
+    const handleExportNotebook = async () => {
+        if (!id || !logs.length) return
+
+        // Find the preprocessing log to get options
+        const preprocessingLog = logs.find(l => l.step_name === "preprocessing") || logs[0]
+        const options = preprocessingLog?.parameters || {}
+
+        try {
+            const blob = await exportNotebook(parseInt(id), options)
+            const url = window.URL.createObjectURL(new Blob([blob]))
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', `preprocessing_notebook_${id}.ipynb`)
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+            toast({
+                title: "Notebook exported",
+                description: "Jupyter notebook has been downloaded.",
+            })
+        } catch (error) {
+            toast({
+                title: "Export failed",
+                description: "Failed to export notebook.",
+                variant: "destructive"
+            })
         }
     }
 
@@ -85,6 +131,18 @@ export default function ComparisonView() {
             <PageHeader
                 title="Before & After Comparison"
                 description="See exactly what changed during preprocessing"
+                actions={
+                    <>
+                        <Button variant="outline" onClick={handleExportNotebook}>
+                            <FileCode className="mr-2 h-4 w-4" />
+                            Export Notebook
+                        </Button>
+                        <Button onClick={handleDownload}>
+                            <Download className="mr-2 h-4 w-4" />
+                            Download Data
+                        </Button>
+                    </>
+                }
             />
 
             {/* Summary Cards */}

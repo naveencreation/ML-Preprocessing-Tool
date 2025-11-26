@@ -88,6 +88,13 @@ export const generatePreprocessingCode = async (id: number, options: Preprocessi
     return response.data;
 };
 
+export const exportNotebook = async (id: number, options: PreprocessingOptions) => {
+    const response = await api.post(`/preprocessing/${id}/export-notebook`, options, {
+        responseType: 'blob'
+    });
+    return response.data;
+};
+
 export const getDatasetComparison = async (id: number) => {
     const response = await api.get(`/preprocessing/${id}/comparison`);
     return response.data;
@@ -158,5 +165,10 @@ export const deleteTemplate = async (id: number) => {
 
 export const getAllLogs = async () => {
     const response = await api.get('/preprocessing/logs/all');
+    return response.data;
+};
+
+export const getDatasetLogs = async (id: number) => {
+    const response = await api.get(`/preprocessing/${id}/logs`);
     return response.data;
 };
