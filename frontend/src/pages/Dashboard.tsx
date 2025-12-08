@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, GitCompare, LayoutDashboard, BarChart2, GitMerge } from "lucide-react"
+import { Loader2, GitCompare, LayoutDashboard, BarChart2, GitMerge, Brain } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { getEDAStats } from "@/lib/api"
 import { SmartInsights } from "@/features/eda/SmartInsights"
@@ -68,6 +68,14 @@ export default function Dashboard() {
                     description="Analyze distributions, correlations, and data quality"
                 />
                 <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        className="gap-2 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 dark:bg-purple-950/50 dark:border-purple-800 dark:text-purple-300"
+                        onClick={() => navigate(`/intelligence/${id}`)}
+                    >
+                        <Brain className="h-4 w-4" />
+                        AI Intelligence
+                    </Button>
                     {hasParent && (
                         <Button
                             variant="outline"

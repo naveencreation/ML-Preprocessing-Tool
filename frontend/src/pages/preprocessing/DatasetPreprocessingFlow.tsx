@@ -14,7 +14,7 @@ import { applyPreprocessing, generatePreprocessingCode, getDatasetPreview } from
 import { preprocessingSteps } from "@/data/preprocessingSteps"
 import { mapStepsToApiOptions } from "@/lib/preprocessing-utils"
 import type { PreprocessingTemplate } from "@/lib/templates"
-import { Play, FileCode, Loader2 } from "lucide-react"
+import { Play, FileCode, Loader2, Brain } from "lucide-react"
 
 export default function DatasetPreprocessingFlow() {
     const { id } = useParams<{ id: string }>()
@@ -197,6 +197,14 @@ export default function DatasetPreprocessingFlow() {
                     backPath="/datasets"
                 />
                 <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => navigate(`/intelligence/${id}`)}
+                        className="gap-2 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 dark:bg-purple-950/50 dark:border-purple-800 dark:text-purple-300"
+                    >
+                        <Brain className="h-4 w-4" />
+                        AI Intelligence
+                    </Button>
                     <TemplateManager
                         dataType="dataset"
                         onLoadTemplate={handleLoadTemplate}

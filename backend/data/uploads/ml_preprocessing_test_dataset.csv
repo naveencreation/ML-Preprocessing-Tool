@@ -1,0 +1,27 @@
+id,age,income,join_date,country,gender,is_active,score,category_multi,comments
+1,25,45000,2024-01-05,India,Male,True,0.85,A|B,Normal clean row
+2,,52000.50,05/01/2024,india ,F,yes,0.92,A,
+3,unknown,NA,2024-13-01,U.S.,female,No,-1.2,B|C,Has invalid date and negative score
+4,150,"1,20,000",Jan 5 2024,USA,M,1,9999,C,Extreme values everywhere
+5,-5,0,2024/01/06,United States,Other,0,0,,Negative age
+5,-5,0,2024/01/06,United States,Other,0,0,,Perfect duplicate row to test deduplication
+6,30 ,€70000,2024-01-07T10:15:00,UK,N/A,Y,0.5,"A,B","Age as string with space, income with currency symbol"
+7,twenty-five,,,United Kingdom,,,,,Row full of missing-ish values
+8,,,07-01-2024,usa,Male ,true,0.7,B,nulls in numeric fields
+9,40,100000.0,2024-01-08,INDIA,MALE,FALSE,0.1,A|C,All-caps categories
+10a,32,"75,000",2024-01-09 15:30,In,FEMALE,n,1.1,"A,B,C",ID is not purely numeric
+11,0,-5000,2024-01-32,N/A,NA,?,-0.01,None,"Invalid date, negative income, weird bool"
+12,   ,   ,   ,   ,   ,   ,   ,   ,Row of whitespace
+13,29,45000.12345,2024-01-10,U.S.A,F,True,0.3333333,A||B,"Too many decimal places, weird category separator"
+14,27,INR 60000,20240111,Bharat,Female,Yes,0.65,C|D,New country alias; date without separators
+15,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,String NaN everywhere
+16,35,"50000,75",11.01.2024,DE,M,0,0.44,B;C,European number format; unusual category separator
+17,31,   47000,2024-01-11Z,usa , male, true ,0.76 , A | B ,Leading/trailing spaces everywhere
+18,28,"$55,000.00",1704931200,US,F,True,0.88,,"Timestamp date, bool as real boolean"
+19,999,999999999,3000-01-01,Mars,Robot,YES,42,X|Y|Z,Crazy synthetic outlier row
+20,22,40k,yesterday,Earth,F,sometimes,high,A+B+C,Natural language date; non-numeric score label
+21,26,35000.00,2024-01-12,Inida,FeMale,true,0.56,C|A,"Country typo, mixed-case gender"
+22,33,₨70000,2024-01-12 00:00:00+05:30,India,M,FALSE ,0.61,,Currency symbol rupee and timezone in date
+23,,??,??,??,??,??,??,??,Weird placeholder values
+24,27,50 000,2024-1-2,In-dia,F,T,0.73,A|,"Space in number, partial category"
+25,27,"""55000""","""2024-01-02""","""India""","""F""","""True""","""0.80""","""A|B""",Everything wrapped in quotes as literal characters

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ArrowRight, Loader2, TrendingDown, TrendingUp, Plus, Minus } from "lucide-react"
+import { ArrowRight, Loader2, TrendingDown, TrendingUp, Plus, Minus, Brain, BarChart2, Sparkles } from "lucide-react"
 import { motion } from "framer-motion"
 import { downloadDataset, exportNotebook, getDatasetComparison, getDatasetLogs } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
@@ -36,6 +36,7 @@ interface ComparisonData {
 
 export default function ComparisonView() {
     const { id } = useParams()
+    const navigate = useNavigate()
     const { toast } = useToast()
     const [loading, setLoading] = useState(true)
     const [comparison, setComparison] = useState<ComparisonData | null>(null)
@@ -418,6 +419,50 @@ export default function ComparisonView() {
                     </Card>
                 </motion.div>
             )}
+
+            {/* Next Steps */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+                <Card className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-purple-200 dark:border-purple-800">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-purple-600" />
+                            What's Next?
+                        </CardTitle>
+                        <CardDescription>Your data is now clean and ready. Choose your next step:</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid gap-4 md:grid-cols-3">
+                            <Button
+                                variant="outline"
+                                className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                                onClick={() => navigate(`/intelligence/${id}`)}
+                            >
+                                <Brain className="w-8 h-8 text-purple-600" />
+                                <span className="font-semibold">AI Intelligence</span>
+                                <span className="text-xs text-muted-foreground">Get AI-powered insights</span>
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                                onClick={() => navigate(`/dashboard/${id}`)}
+                            >
+                                <BarChart2 className="w-8 h-8 text-blue-600" />
+                                <span className="font-semibold">View Dashboard</span>
+                                <span className="text-xs text-muted-foreground">Explore your clean data</span>
+                            </Button>
+                            <Button
+                                variant="default"
+                                className="h-auto py-4 flex flex-col items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                                onClick={handleDownload}
+                            >
+                                <Download className="w-8 h-8" />
+                                <span className="font-semibold">Download Data</span>
+                                <span className="text-xs opacity-80">Get the processed CSV</span>
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </motion.div>
         </div>
     )
 }

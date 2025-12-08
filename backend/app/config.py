@@ -2,7 +2,10 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env from backend directory explicitly (not relying on CWD)
+_backend_dir = Path(__file__).resolve().parent.parent  # config.py -> app -> backend
+_env_file = _backend_dir / ".env"
+load_dotenv(_env_file, override=True)
 
 class Settings:
     PROJECT_NAME: str = "ML Preprocessing Tool"

@@ -4,7 +4,7 @@ from app.config import settings
 from app.database import engine, Base
 from app.utils.logging import setup_logging, get_logger
 
-from app.routers import datasets, preprocessing, eda, workflows, training, inference
+from app.routers import datasets, preprocessing, eda, workflows, training, inference, intelligence
 
 # Setup structured logging
 setup_logging(level="INFO")
@@ -41,6 +41,7 @@ app.include_router(eda.router)
 app.include_router(workflows.router)
 app.include_router(training.router)
 app.include_router(inference.router)
+app.include_router(intelligence.router)
 
 @app.get("/")
 def read_root():

@@ -19,6 +19,7 @@ const Settings = lazy(() => import("@/pages/Settings"));
 const Workflows = lazy(() => import("@/pages/Workflows"));
 const Logs = lazy(() => import("@/pages/Logs"));
 const ComparisonView = lazy(() => import("./pages/ComparisonView"));
+const Intelligence = lazy(() => import("./pages/Intelligence"));
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
                 <Route path="/workflows" element={<Workflows />} />
                 <Route path="/logs" element={<Logs />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/intelligence/:datasetId" element={<Intelligence />} />
               </Routes>
             </Suspense>
           </ErrorBoundary>
