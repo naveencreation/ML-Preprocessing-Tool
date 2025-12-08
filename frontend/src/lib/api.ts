@@ -33,9 +33,6 @@ export const getDataset = async (id: number) => {
     return response.data;
 };
 
-
-
-
 export const getDatasetPreview = async (id: number) => {
     const response = await api.get(`/datasets/${id}/preview`);
     return response.data;
@@ -74,7 +71,39 @@ export interface PreprocessingOptions {
     train_test_split?: boolean
     test_size?: number
     stratify?: boolean
+
+    // Text Processing
+    text_cleaning_method?: string
+    stopword_removal?: boolean
+    stemming?: boolean
+    lemmatization?: boolean
+    vectorization_method?: string
+
+    // Image Processing
+    image_resize?: boolean
+    image_width?: number
+    image_height?: number
+    image_grayscale?: boolean
+    image_augmentation?: boolean
+
+    // Audio Processing
+    audio_trim_silence?: boolean
+    audio_resample?: boolean
+    audio_sample_rate?: number
+    audio_feature_extraction?: string
+
+    // Log Processing
+    log_parse_timestamp?: boolean
+    log_extract_levels?: boolean
+    log_pattern_extraction?: string
+
+    // Time Series Processing
+    ts_resample?: boolean
+    ts_resample_freq?: string
+    ts_lag_features?: boolean
+    ts_rolling_window?: boolean
 }
+
 
 export const applyPreprocessing = async (id: number, options: PreprocessingOptions) => {
     const response = await api.post(`/preprocessing/${id}/apply`, options);
@@ -170,5 +199,49 @@ export const getAllLogs = async () => {
 
 export const getDatasetLogs = async (id: number) => {
     const response = await api.get(`/preprocessing/${id}/logs`);
+    return response.data;
+};
+export interface TrainingOptions {
+    target_column: string
+    model_type: string
+    test_size?: number
+    hyperparameters?: Record<string, any>
+    cross_validation?: boolean
+    cv_folds?: number
+}
+
+export interface TrainingResult {
+    status: string
+    model_type: string
+    model_path: string
+    metrics: Record<string, number>
+}
+
+export const trainModel = async (datasetId: number, options: TrainingOptions) => {
+    const response = await api.post(`/training/${datasetId}/train`, options);
+    return response.data as TrainingResult;
+};
+
+export const getTrainedModels = async (datasetId: number) => {
+    const response = await api.get(`/training/${datasetId}/models`);
+    return response.data;
+};
+
+export interface InferenceResult {
+    predictions: any[]
+    probabilities?: any[]
+}
+
+export const predict = async (modelId: string, data: any[]) => {
+    // Note: The backend inference endpoint might need adjustment to take model_path or ID
+    // Currently backend expects model_path in the body?
+    // Let's check backend/app/routers/inference.py
+    // It takes InferenceRequest with model_path and data.
+    const response = await api.post('/inference/predict', { model_path: modelId, data });
+    return response.data as InferenceResult;
+};
+
+export const getModelInfo = async (datasetId: number) => {
+    const response = await api.get(`/inference/${datasetId}/info`);
     return response.data;
 };

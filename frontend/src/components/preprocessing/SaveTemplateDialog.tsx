@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { saveTemplate, type PreprocessingTemplate } from "@/lib/templates"
+import { saveTemplate } from "@/lib/templates"
 import { Save } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 

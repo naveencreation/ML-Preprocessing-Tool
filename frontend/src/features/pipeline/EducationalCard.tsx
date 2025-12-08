@@ -14,7 +14,7 @@ export function EducationalCard({ title, description, nextStep }: EducationalCar
                 <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center gap-2">
                         <Lightbulb className="h-4 w-4" />
-                        Why this step matters
+                        {title}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>

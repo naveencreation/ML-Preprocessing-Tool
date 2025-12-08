@@ -4,12 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
 import {
-    Database,
-    FileText,
-    Image as ImageIcon,
-    Music,
-    Video,
-    FileCode,
     ArrowRight,
     CheckCircle2,
     XCircle,
@@ -17,66 +11,11 @@ import {
     Lightbulb,
     Sparkles,
     TrendingUp,
-    Zap
+    Zap,
+    Database
 } from "lucide-react"
+import { DATA_TYPES } from "@/lib/data-types"
 
-const dataTypes = [
-    {
-        icon: Database,
-        title: "Dataset / Tabular",
-        description: "CSV, Excel, structured data with rows and columns",
-        fileTypes: ".csv, .xlsx, .json",
-        color: "text-blue-500",
-        bgColor: "bg-blue-500/10",
-        steps: ["Missing Values", "Encoding", "Scaling", "Feature Selection"]
-    },
-    {
-        icon: FileText,
-        title: "Text",
-        description: "Documents, reviews, social media, any text data",
-        fileTypes: ".txt, .csv (with text column)",
-        color: "text-purple-500",
-        bgColor: "bg-purple-500/10",
-        steps: ["Cleaning", "Tokenization", "Stopword Removal", "Vectorization"]
-    },
-    {
-        icon: ImageIcon,
-        title: "Image",
-        description: "Photos, medical scans, satellite imagery",
-        fileTypes: ".jpg, .png, .tiff, .bmp",
-        color: "text-green-500",
-        bgColor: "bg-green-500/10",
-        steps: ["Resize", "Normalize", "Augment", "Convert to Tensor"]
-    },
-    {
-        icon: Music,
-        title: "Audio",
-        description: "Speech, music, sound recordings",
-        fileTypes: ".wav, .mp3, .flac",
-        color: "text-orange-500",
-        bgColor: "bg-orange-500/10",
-        steps: ["Resample", "Trim Silence", "Extract MFCCs", "Spectrogram"]
-    },
-    {
-        icon: Video,
-        title: "Video",
-        description: "Movies, surveillance footage, activity recordings",
-        fileTypes: ".mp4, .avi, .mov",
-        color: "text-red-500",
-        bgColor: "bg-red-500/10",
-        steps: ["Extract Frames", "Resize", "Extract Audio", "Scene Detection"],
-        comingSoon: true
-    },
-    {
-        icon: FileCode,
-        title: "Logs",
-        description: "System logs, application logs, server logs",
-        fileTypes: ".log, .txt, .csv",
-        color: "text-teal-500",
-        bgColor: "bg-teal-500/10",
-        steps: ["Parse Timestamps", "Extract Levels", "Pattern Extraction", "Anomaly Detection"]
-    }
-]
 
 const whyPreprocessing = [
     {
@@ -266,7 +205,7 @@ export default function Overview() {
                 </motion.div>
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {dataTypes.map((type, index) => (
+                    {DATA_TYPES.map((type, index) => (
                         <motion.div
                             key={type.title}
                             initial={{ opacity: 0, scale: 0.95 }}

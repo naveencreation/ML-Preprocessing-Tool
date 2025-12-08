@@ -10,6 +10,9 @@ from app.database import get_db
 from app import models, schemas
 from app.config import settings
 from app.services import dataset_service
+from app.utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter(
     prefix="/datasets",
@@ -18,7 +21,10 @@ router = APIRouter(
 
 @router.post("/upload", response_model=schemas.Dataset)
 def upload_dataset(file: UploadFile = File(...), db: Session = Depends(get_db)):
-    return dataset_service.handle_file_upload(file, db)
+    logger.info(f"Uploading file: {file.filename}")
+    result = dataset_service.handle_file_upload(file, db)
+    logger.info(f"Successfully uploaded dataset ID: {result.id}")
+    return result
 
 @router.get("/", response_model=List[schemas.Dataset])
 def list_datasets(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
@@ -187,6 +193,7 @@ def delete_dataset(dataset_id: int, db: Session = Depends(get_db)):
         
     db.delete(dataset)
     db.commit()
+    logger.info(f"Deleted dataset ID: {dataset_id}")
     return {"message": "Dataset and derived files deleted successfully"}
 
 @router.put("/{dataset_id}", response_model=schemas.Dataset)

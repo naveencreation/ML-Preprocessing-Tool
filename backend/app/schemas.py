@@ -91,6 +91,7 @@ class PreprocessingOptions(BaseModel):
     rare_category_handling: bool = False
     
     # Text Specific
+    text_column: Optional[str] = None
     text_cleaning_method: str = "None" # "None", "Simple", "Advanced"
     stopword_removal: bool = False
     stemming: bool = False
@@ -99,6 +100,7 @@ class PreprocessingOptions(BaseModel):
     vectorization_method: str = "None" # "None", "TF-IDF", "Count", "Word2Vec"
 
     # Image Specific
+    image_column: Optional[str] = None
     image_resize: bool = False
     image_width: int = 224
     image_height: int = 224
@@ -107,6 +109,7 @@ class PreprocessingOptions(BaseModel):
     image_augmentation: bool = False # Basic rotation/flipping
 
     # Audio Specific
+    audio_column: Optional[str] = None
     audio_resample: bool = False
     audio_sample_rate: int = 16000
     audio_trim_silence: bool = False
@@ -173,3 +176,13 @@ class WorkflowTemplate(WorkflowTemplateBase):
 
     class Config:
         from_attributes = True
+
+class TrainingOptions(BaseModel):
+    target_column: str
+    model_type: str = "logistic_regression" # logistic_regression, random_forest_classifier, etc.
+    test_size: float = 0.2
+    hyperparameters: Optional[Dict[str, Any]] = None
+    
+    # Cross Validation
+    cross_validation: bool = False
+    cv_folds: int = 5

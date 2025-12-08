@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import PageHeader from "@/components/PageHeader"
-import { PreprocessingStepCard } from "@/components/preprocessing/PreprocessingStepCard"
 import { TemplateManager } from "@/components/preprocessing/TemplateManager"
 import { SaveTemplateDialog } from "@/components/preprocessing/SaveTemplateDialog"
 import { PreprocessingStepsSkeleton, DatasetInfoSkeleton } from "@/components/preprocessing/LoadingSkeletons"
+import { TimelineNav } from "@/components/preprocessing/TimelineNav"
+import { StepWorkspace } from "@/components/preprocessing/StepWorkspace"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -13,8 +14,7 @@ import { applyPreprocessing, generatePreprocessingCode, getDatasetPreview } from
 import { preprocessingSteps } from "@/data/preprocessingSteps"
 import { mapStepsToApiOptions } from "@/lib/preprocessing-utils"
 import type { PreprocessingTemplate } from "@/lib/templates"
-import { motion } from "framer-motion"
-import { Play, FileCode, Loader2, CheckCircle2, AlertCircle } from "lucide-react"
+import { Play, FileCode, Loader2 } from "lucide-react"
 
 export default function DatasetPreprocessingFlow() {
     const { id } = useParams<{ id: string }>()
@@ -25,6 +25,9 @@ export default function DatasetPreprocessingFlow() {
     const [isLoading, setIsLoading] = useState(true)
     const [isProcessing, setIsProcessing] = useState(false)
     const [isGeneratingCode, setIsGeneratingCode] = useState(false)
+
+    // Timeline State
+    const [activeStepId, setActiveStepId] = useState<string>('missing_values')
 
     // Step enablement state
     const [enabledSteps, setEnabledSteps] = useState<Record<string, boolean>>({
@@ -110,10 +113,7 @@ export default function DatasetPreprocessingFlow() {
     const handleGenerateCode = async () => {
         setIsGeneratingCode(true)
         try {
-            // Build options same as apply
-            // Build options same as apply
             const options = mapStepsToApiOptions('dataset', steps, enabledSteps, stepParameters)
-
             const code = await generatePreprocessingCode(parseInt(id!), options, 'detailed')
 
             // Download code as .py file
@@ -156,6 +156,22 @@ export default function DatasetPreprocessingFlow() {
         setStepParameters(newStepParameters)
     }
 
+    // Navigation Helpers
+    const currentStepIndex = steps.findIndex(s => s.id === activeStepId)
+    const activeStep = steps[currentStepIndex]
+
+    const handleNext = () => {
+        if (currentStepIndex < steps.length - 1) {
+            setActiveStepId(steps[currentStepIndex + 1].id)
+        }
+    }
+
+    const handlePrev = () => {
+        if (currentStepIndex > 0) {
+            setActiveStepId(steps[currentStepIndex - 1].id)
+        }
+    }
+
     if (isLoading) {
         return (
             <div className="space-y-8">
@@ -172,137 +188,105 @@ export default function DatasetPreprocessingFlow() {
     }
 
     return (
-        <div className="space-y-8">
-            <PageHeader
-                title="Dataset Preprocessing"
-                description="Configure step-by-step preprocessing for your tabular data"
-                showBack
-                backPath="/datasets"
-            />
-
-            {/* Dataset Info */}
-            {datasetInfo && (
-                <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20">
-                    <CardContent className="pt-6">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <h3 className="text-lg font-semibold mb-2">{datasetInfo.filename}</h3>
-                                <div className="flex gap-4 text-sm text-muted-foreground">
-                                    <span>{datasetInfo.total_rows?.toLocaleString()} rows</span>
-                                    <span>•</span>
-                                    <span>{datasetInfo.columns?.length} columns</span>
-                                    <span>•</span>
-                                    <span>{enabledCount} of {steps.length} steps enabled</span>
-                                </div>
-                            </div>
-                            <Badge variant="secondary" className="text-sm">
-                                Tabular Data
-                            </Badge>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
-
-            {/* Steps */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="text-xl font-semibold">Preprocessing Steps</h2>
-                        <p className="text-sm text-muted-foreground">
-                            Select and configure the steps to apply to your dataset
-                        </p>
-                    </div>
-                    <div className="flex gap-2">
-                        <TemplateManager
-                            dataType="dataset"
-                            onLoadTemplate={handleLoadTemplate}
-                        />
-                        <SaveTemplateDialog
-                            dataType="dataset"
-                            currentConfig={{ enabledSteps, stepParameters }}
-                        />
-                        <Button
-                            variant="outline"
-                            onClick={handleGenerateCode}
-                            disabled={isGeneratingCode || enabledCount === 0}
-                        >
-                            {isGeneratingCode ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                                <FileCode className="h-4 w-4 mr-2" />
-                            )}
-                            Generate Code
-                        </Button>
-                        <Button
-                            onClick={handleApplyPreprocessing}
-                            disabled={isProcessing || enabledCount === 0}
-                        >
-                            {isProcessing ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                                <Play className="h-4 w-4 mr-2" />
-                            )}
-                            Apply Preprocessing
-                        </Button>
-                    </div>
-                </div>
-
-                {enabledCount === 0 && (
-                    <Card className="border-amber-500/50 bg-amber-500/10">
-                        <CardContent className="pt-6">
-                            <div className="flex items-start gap-3">
-                                <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
-                                <div>
-                                    <p className="font-medium text-amber-900 dark:text-amber-100">
-                                        No steps enabled
-                                    </p>
-                                    <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
-                                        Enable at least one preprocessing step to continue
-                                    </p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-
-                <div className="space-y-3">
-                    {steps.map((step) => (
-                        <PreprocessingStepCard
-                            key={step.id}
-                            step={step}
-                            isEnabled={enabledSteps[step.id]}
-                            onToggle={(enabled) => handleToggleStep(step.id, enabled)}
-                            parameters={stepParameters[step.id]}
-                            onParameterChange={(param, value) => handleParameterChange(step.id, param, value)}
-                        />
-                    ))}
+        <div className="space-y-6 h-[calc(100vh-100px)] flex flex-col">
+            <div className="flex items-center justify-between shrink-0">
+                <PageHeader
+                    title="Dataset Preprocessing"
+                    description="Configure your pipeline step-by-step"
+                    showBack
+                    backPath="/datasets"
+                />
+                <div className="flex gap-2">
+                    <TemplateManager
+                        dataType="dataset"
+                        onLoadTemplate={handleLoadTemplate}
+                    />
+                    <SaveTemplateDialog
+                        dataType="dataset"
+                        currentConfig={{ enabledSteps, stepParameters }}
+                    />
+                    <Button
+                        variant="outline"
+                        onClick={handleGenerateCode}
+                        disabled={isGeneratingCode || enabledCount === 0}
+                    >
+                        {isGeneratingCode ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                            <FileCode className="h-4 w-4 mr-2" />
+                        )}
+                        Generate Code
+                    </Button>
+                    <Button
+                        onClick={handleApplyPreprocessing}
+                        disabled={isProcessing || enabledCount === 0}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/20"
+                    >
+                        {isProcessing ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                            <Play className="h-4 w-4 mr-2" />
+                        )}
+                        Run Pipeline
+                    </Button>
                 </div>
             </div>
 
-            {/* Success Summary */}
-            {enabledCount > 0 && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                >
-                    <Card className="border-green-500/50 bg-green-500/10">
-                        <CardContent className="pt-6">
-                            <div className="flex items-start gap-3">
-                                <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
-                                <div className="flex-1">
-                                    <p className="font-medium text-green-900 dark:text-green-100 mb-1">
-                                        Ready to process
-                                    </p>
-                                    <p className="text-sm text-green-800 dark:text-green-200">
-                                        {enabledCount} preprocessing {enabledCount === 1 ? 'step' : 'steps'} will be applied to your dataset.
-                                        Click "Apply Preprocessing" to start.
-                                    </p>
+            {/* Main Split View */}
+            <div className="flex-1 grid grid-cols-12 gap-6 min-h-0">
+                {/* Left Panel: Timeline Navigation */}
+                <Card className="col-span-3 h-full overflow-y-auto border-r bg-muted/10">
+                    <CardContent className="p-0">
+                        <div className="p-4 border-b bg-background/50 backdrop-blur sticky top-0 z-10">
+                            <h3 className="font-semibold">Pipeline Steps</h3>
+                            <p className="text-xs text-muted-foreground">
+                                {enabledCount} of {steps.length} steps enabled
+                            </p>
+                        </div>
+                        <TimelineNav
+                            steps={steps}
+                            currentStepId={activeStepId}
+                            completedSteps={enabledSteps} // Using enabled as "completed" for now, logic can be refined
+                            enabledSteps={enabledSteps}
+                            onStepSelect={setActiveStepId}
+                        />
+                    </CardContent>
+                </Card>
+
+                {/* Right Panel: Active Step Workspace */}
+                <div className="col-span-9 h-full flex flex-col gap-4">
+                    {/* Dataset Info Bar */}
+                    {datasetInfo && (
+                        <Card className="shrink-0 bg-primary/5 border-primary/10">
+                            <CardContent className="py-3 px-4 flex items-center justify-between">
+                                <div className="flex items-center gap-4 text-sm">
+                                    <span className="font-medium">{datasetInfo.filename}</span>
+                                    <span className="text-muted-foreground">|</span>
+                                    <span className="text-muted-foreground">{datasetInfo.total_rows?.toLocaleString()} rows</span>
+                                    <span className="text-muted-foreground">|</span>
+                                    <span className="text-muted-foreground">{datasetInfo.columns?.length} columns</span>
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            )}
+                                <Badge variant="outline" className="bg-background">Tabular Data</Badge>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Workspace */}
+                    <div className="flex-1 min-h-0">
+                        <StepWorkspace
+                            step={activeStep}
+                            isEnabled={enabledSteps[activeStep.id]}
+                            onToggle={(enabled) => handleToggleStep(activeStep.id, enabled)}
+                            parameters={stepParameters[activeStep.id]}
+                            onParameterChange={(param, value) => handleParameterChange(activeStep.id, param, value)}
+                            onNext={handleNext}
+                            onPrev={handlePrev}
+                            isFirst={currentStepIndex === 0}
+                            isLast={currentStepIndex === steps.length - 1}
+                        />
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }

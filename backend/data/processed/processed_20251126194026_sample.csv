@@ -1,0 +1,237 @@
+content
+"You are an AI pair programmer working  on my existing project called ""ML-Preprocessing-Tool""."
+This app already loads datasets (CSV/Excel) and does basic preprocessing/EDA in a modular way .
+""
+🎯 OVERALL GOAL
+""
+"Upgrade this app to support an industry-level data preprocessing pipeline for tabular datasets, in a way that:"
+""
+Keeps all existing functionality working (no breaking changes).
+""
+Adds missing preprocessing steps only if they are not already implemented.
+""
+"Organizes the preprocessing steps in a clear, logical order (like a real ML production pipeline)."
+""
+Teaches the user while they use it:
+""
+"For every step: show what the step does, why it is needed, and why it comes after the previous step."
+""
+The UI should feel like an interactive tutorial + practical tool.
+""
+Do not blindly refactor or optimize everything.
+"Only change code where necessary to add features, improve structure, or cleanly integrate the pipeline."
+""
+📂 CONTEXT ABOUT THE APP
+""
+App type: Streamlit.
+""
+"Structure: Modular, index.py as entry point, separate pages/modules for features (e.g., upload, preprocessing, EDA, etc.)."
+""
+Goal: Let users upload a dataset and perform ML-ready preprocessing.
+""
+When you explore the repo:
+""
+"First, scan the existing modules and understand what is already implemented (upload, missing values, encoding, scaling, etc.)."
+""
+"Then, map my current functionality to the desired pipeline below."
+""
+"Finally, add missing pieces + improve UX around the pipeline and explanations."
+""
+🧠 TARGET PIPELINE (WHAT YOU MUST IMPLEMENT)
+""
+"Implement / organize the following industry-level preprocessing steps for tabular data, in this order."
+"If some steps already exist, reuse them and only improve or re-organize the UI."
+""
+Data Ingestion & Schema Standardization
+""
+Dataset upload (CSV/Excel already exists – reuse).
+""
+"Show schema: column names, data types, shape."
+""
+Enforce consistent datatypes where possible (int/float/str/bool/datetime).
+""
+Data Quality Checks
+""
+Missing values overview per column (% missing).
+""
+Duplicate records count.
+""
+"Basic range checks for numerical columns (min, max)."
+""
+"Type validation (e.g., numeric columns with text noise)."
+""
+Show this in a clear “Data Quality” summary panel.
+""
+Data Cleaning
+""
+Missing Value Handling
+""
+"Options: drop rows/columns, mean/median/mode imputation, forward/backward fill."
+""
+Duplicate Handling
+""
+Show duplicates; allow user to remove them.
+""
+Inconsistency Fixing
+""
+"Standardize category labels (e.g., “Male/male/MALE”)."
+""
+"Strip whitespace, fix casing for string columns."
+""
+Outlier Processing
+""
+Detect outliers using simple IQR method at least.
+""
+Show which columns and how many outliers.
+""
+"Give user options: remove, cap, or keep."
+""
+Feature Engineering
+""
+Categorical Features
+""
+"Options: one-hot encoding, label encoding; show when to use which."
+""
+Numerical Features
+""
+"Options: standard scaling, min–max scaling, robust scaling."
+""
+Date & Time Features
+""
+"If datetime columns exist: extract year, month, day, weekday, etc."
+""
+Text Features (Optional)
+""
+If text columns present: mark them and suggest separate text preprocessing or basic cleaning (no need to implement full NLP).
+""
+Target Variable Processing
+""
+Let user select which column is the “target”.
+""
+For classification: handle label encoding.
+""
+For imbalanced classes: show class distribution + information about SMOTE/oversampling (you may add it as a future feature or simple toggle if easy).
+""
+Feature Selection (Basic)
+""
+Show correlation matrix for numerical features.
+""
+Let user optionally drop highly correlated features (above a threshold).
+""
+Allow dropping constant/low-variance features.
+""
+Train/Test Split
+""
+"Let user choose test size (e.g., slider)."
+""
+For classification: support stratified split.
+""
+"For time-series (if datetime exists): show a note about time-based splitting and, if feasible, provide simple chronological split."
+""
+Export & Reproducibility
+""
+Allow user to:
+""
+Download the processed dataset as CSV.
+""
+See a summary of chosen preprocessing settings (like a preprocessing report).
+""
+Keep this simple but clear.
+""
+🧩 UX / UI REQUIREMENTS (VERY IMPORTANT)
+""
+This app should teach the user step-by-step while they preprocess. Update the UI accordingly:
+""
+Organize the preprocessing UI as a stepper / wizard or clearly separated sections in order:
+""
+1️⃣ Data Ingestion
+""
+2️⃣ Data Quality
+""
+3️⃣ Cleaning
+""
+4️⃣ Feature Engineering
+""
+5️⃣ Target & Imbalance
+""
+6️⃣ Feature Selection
+""
+7️⃣ Train/Test Split
+""
+8️⃣ Export
+""
+"For each step, add:"
+""
+"A short title (e.g., “Step 3: Data Cleaning – Fix Missing Values & Outliers”)."
+""
+A short paragraph:
+""
+What this step does.
+""
+Why it is important.
+""
+Why it comes after the previous step.
+""
+"Use small info boxes (st.info, st.warning, etc.) to explain best practices."
+""
+Keep the design:
+""
+Clean and minimal.
+""
+Consistent spacing and headings.
+""
+Easy to follow from top to bottom like a guided flow.
+""
+"Wherever a user chooses an option (e.g., imputation strategy, encoding type, scaling method), briefly explain:"
+""
+When that option is preferred.
+""
+Possible trade-offs.
+""
+⚙️ IMPLEMENTATION GUIDELINES
+""
+Do NOT remove existing features unless they are clearly redundant or broken.
+""
+Prefer extending current modules instead of rewriting everything.
+""
+If large refactors are required:
+""
+"First, organize code into clear functions for each preprocessing step."
+""
+"Keep names descriptive (e.g., handle_missing_values, encode_categorical_features, etc.)."
+""
+"Avoid over-optimization; focus on clarity, modularity, and correctness."
+""
+"Make sure all transformations are applied to a central DataFrame in a clear, traceable flow."
+""
+"Ensure that the user can see intermediate results after major steps (e.g., cleaned data preview, encoded data preview)."
+""
+✅ DELIVERABLES / WHAT I EXPECT YOU TO DO
+""
+Scan the current repo and identify:
+""
+Which preprocessing steps already exist.
+""
+Which are missing.
+""
+Update or create:
+""
+A main preprocessing page or flow that follows the step order above.
+""
+Helper functions for each step.
+""
+UI components that explain each step (what/why/why-after-previous).
+""
+Ensure:
+""
+The user can go through the entire pipeline from upload → export.
+""
+Each step feels like a mini-tutorial.
+""
+Existing workflows still work (no broken pages).
+""
+After changes:
+""
+"Clean up unused code if any,"
+""
+Keep everything readable and maintainable.

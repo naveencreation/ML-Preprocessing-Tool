@@ -6,11 +6,12 @@ import {
     Upload,
     Zap,
     BarChart3,
-    Shield,
     Database,
     Sparkles,
     ArrowRight,
-    Activity
+    Activity,
+    CheckCircle2,
+    FileSpreadsheet
 } from "lucide-react"
 
 const features = [
@@ -19,99 +20,169 @@ const features = [
         title: "Easy Data Upload",
         description: "Drag and drop your CSV files or browse to upload. Supports datasets up to 100MB.",
         color: "text-blue-500",
-        bgColor: "bg-blue-500/10"
+        bgColor: "bg-blue-500/10",
+        borderColor: "group-hover:border-blue-500/50"
     },
     {
         icon: Zap,
         title: "Automated Preprocessing",
         description: "Handle missing values, encode categorical data, and scale features with just a few clicks.",
         color: "text-purple-500",
-        bgColor: "bg-purple-500/10"
+        bgColor: "bg-purple-500/10",
+        borderColor: "group-hover:border-purple-500/50"
     },
     {
         icon: BarChart3,
         title: "Visual Analytics",
         description: "Explore your data with interactive charts, correlation heatmaps, and distribution plots.",
         color: "text-teal-500",
-        bgColor: "bg-teal-500/10"
+        bgColor: "bg-teal-500/10",
+        borderColor: "group-hover:border-teal-500/50"
     },
     {
         icon: Database,
         title: "Dataset Management",
         description: "Keep track of all your datasets in one place. View, download, or reprocess anytime.",
         color: "text-green-500",
-        bgColor: "bg-green-500/10"
+        bgColor: "bg-green-500/10",
+        borderColor: "group-hover:border-green-500/50"
     }
+]
+
+const stats = [
+    { value: "6+", label: "Data Types", icon: FileSpreadsheet },
+    { value: "20+", label: "Preprocessing Steps", icon: Zap },
+    { value: "100%", label: "Open Source", icon: CheckCircle2 },
 ]
 
 const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
-        transition: { staggerChildren: 0.1 }
+        transition: { staggerChildren: 0.1, delayChildren: 0.2 }
     }
 }
 
 const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 30 },
     visible: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.5 }
+        transition: { duration: 0.6 }
     }
 }
 
 export default function Home() {
     return (
-        <div className="space-y-12">
+        <div className="space-y-16">
             {/* Hero Section */}
             <motion.section
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/5 via-accent/5 to-background border border-white/20 shadow-xl p-12 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8 }}
+                className="relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl"
             >
-                <div className="relative z-10 max-w-4xl mx-auto">
+                {/* Animated Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900/50 to-slate-900" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-600/20 via-transparent to-transparent" />
+
+                {/* Grid Pattern */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:40px_40px]" />
+
+                {/* Floating Orbs */}
+                <motion.div
+                    animate={{
+                        y: [0, -20, 0],
+                        opacity: [0.3, 0.6, 0.3]
+                    }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-20 right-20 h-64 w-64 rounded-full bg-blue-500/30 blur-[80px]"
+                />
+                <motion.div
+                    animate={{
+                        y: [0, 20, 0],
+                        opacity: [0.3, 0.5, 0.3]
+                    }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                    className="absolute bottom-20 left-20 h-72 w-72 rounded-full bg-purple-500/30 blur-[80px]"
+                />
+
+                <div className="relative z-10 px-8 py-20 text-center lg:py-28">
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.5 }}
                         className="mb-8 flex justify-center"
                     >
-                        <div className="inline-flex items-center gap-2 rounded-full bg-background/50 backdrop-blur-md border border-primary/20 px-4 py-1.5 text-sm font-medium text-primary shadow-sm">
-                            <Sparkles className="h-4 w-4" />
+                        <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-5 py-2 text-sm font-medium text-white shadow-lg">
+                            <Sparkles className="h-4 w-4 text-yellow-400" />
                             <span>AI-Powered Data Preprocessing</span>
                         </div>
                     </motion.div>
 
-                    <h1 className="mb-6 text-5xl font-bold tracking-tight lg:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-accent">
+                    <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.6 }}
+                        className="mb-6 text-5xl font-extrabold tracking-tight text-white lg:text-7xl"
+                    >
                         Transform Your Data
                         <br />
-                        With Confidence
-                    </h1>
+                        <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            With Confidence
+                        </span>
+                    </motion.h1>
 
-                    <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground leading-relaxed">
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4, duration: 0.6 }}
+                        className="mx-auto mb-10 max-w-2xl text-lg text-white/70 leading-relaxed"
+                    >
                         Streamline your machine learning workflow with automated data preprocessing,
-                        exploratory analysis, and beautiful visualizations. Get your data ready
-                        for modeling in minutes, not hours.
-                    </p>
+                        exploratory analysis, and beautiful visualizations.
+                    </motion.p>
 
-                    <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5, duration: 0.6 }}
+                        className="flex flex-col items-center justify-center gap-4 sm:flex-row"
+                    >
                         <Link to="/upload">
-                            <Button size="lg" className="h-12 px-8 rounded-full gap-2 text-base shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all">
-                                Get Started
-                                <ArrowRight className="h-4 w-4" />
+                            <Button size="lg" className="h-14 px-10 rounded-full gap-2 text-base font-semibold bg-white text-slate-900 hover:bg-white/90 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+                                Get Started Free
+                                <ArrowRight className="h-5 w-5" />
                             </Button>
                         </Link>
-                        <Button variant="outline" size="lg" className="h-12 px-8 rounded-full border-primary/20 hover:bg-primary/5 text-base">
-                            View Demo
-                        </Button>
-                    </div>
-                </div>
+                        <Link to="/overview">
+                            <Button variant="outline" size="lg" className="h-14 px-10 rounded-full border-white/30 bg-white/5 backdrop-blur-sm text-white hover:bg-white/10 text-base font-semibold transition-all duration-300">
+                                Learn More
+                            </Button>
+                        </Link>
+                    </motion.div>
 
-                {/* Decorative Elements */}
-                <div className="absolute top-0 right-0 -mr-20 -mt-20 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[100px] opacity-50 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 -ml-20 -mb-20 h-[500px] w-[500px] rounded-full bg-accent/20 blur-[100px] opacity-50 pointer-events-none" />
+                    {/* Stats Row */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6, duration: 0.6 }}
+                        className="mt-16 flex flex-wrap justify-center gap-8 lg:gap-16"
+                    >
+                        {stats.map((stat) => (
+                            <div key={stat.label} className="flex items-center gap-3">
+                                <div className="h-12 w-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                                    <stat.icon className="h-6 w-6 text-white" />
+                                </div>
+                                <div className="text-left">
+                                    <div className="text-2xl font-bold text-white">{stat.value}</div>
+                                    <div className="text-sm text-white/60">{stat.label}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </motion.div>
+                </div>
             </motion.section>
 
             {/* Features Grid */}
@@ -122,9 +193,9 @@ export default function Home() {
                     transition={{ delay: 0.3 }}
                     className="mb-12 text-center"
                 >
-                    <h2 className="mb-4 text-3xl font-bold">Everything You Need</h2>
-                    <p className="text-muted-foreground text-lg">
-                        Powerful features to make data preprocessing effortless
+                    <h2 className="mb-4 text-3xl font-bold lg:text-4xl">Everything You Need</h2>
+                    <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                        Powerful features to make data preprocessing effortless and intuitive
                     </p>
                 </motion.div>
 
@@ -138,18 +209,21 @@ export default function Home() {
                         <motion.div
                             key={feature.title}
                             variants={itemVariants}
-                            whileHover={{ y: -5 }}
-                            transition={{ type: "spring", stiffness: 300 }}
+                            whileHover={{ y: -8, scale: 1.02 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                            className="group"
                         >
-                            <Card className="h-full border border-border/50 bg-card/50 backdrop-blur-sm hover:bg-card/80 hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-md">
+                            <Card className={`h-full border-2 border-border/50 bg-gradient-to-b from-card to-card/50 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${feature.borderColor}`}>
                                 <CardHeader>
-                                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl ${feature.bgColor}`}>
-                                        <feature.icon className={`h-6 w-6 ${feature.color}`} />
-                                    </div>
-                                    <CardTitle className="text-xl">{feature.title}</CardTitle>
+                                    <motion.div
+                                        className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl ${feature.bgColor} transition-transform duration-300 group-hover:scale-110`}
+                                    >
+                                        <feature.icon className={`h-7 w-7 ${feature.color}`} />
+                                    </motion.div>
+                                    <CardTitle className="text-xl font-semibold">{feature.title}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <CardDescription className="text-base">{feature.description}</CardDescription>
+                                    <CardDescription className="text-base leading-relaxed">{feature.description}</CardDescription>
                                 </CardContent>
                             </Card>
                         </motion.div>
@@ -157,34 +231,63 @@ export default function Home() {
                 </motion.div>
             </section>
 
-            {/* Recent Activity (Mock) */}
+            {/* Quick Actions */}
             <motion.section
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
             >
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <Activity className="h-5 w-5 text-primary" />
-                        Recent Activity
+                    <h2 className="text-2xl font-bold flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <Activity className="h-5 w-5 text-primary" />
+                        </div>
+                        Quick Actions
                     </h2>
-                    <Button variant="ghost" className="text-primary">View All</Button>
+                    <Link to="/datasets">
+                        <Button variant="ghost" className="text-primary gap-2">
+                            View All Datasets
+                            <ArrowRight className="h-4 w-4" />
+                        </Button>
+                    </Link>
                 </div>
-                <div className="grid gap-4">
-                    {[1, 2, 3].map((i) => (
-                        <Card key={i} className="flex items-center p-4 gap-4 hover:bg-muted/30 transition-colors cursor-pointer border-border/40">
-                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                                DS
+                <div className="grid gap-4 md:grid-cols-3">
+                    <Link to="/upload" className="block group">
+                        <Card className="h-full flex items-center p-6 gap-4 border-2 border-dashed border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 cursor-pointer">
+                            <div className="h-12 w-12 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <Upload className="h-6 w-6 text-blue-500" />
                             </div>
-                            <div className="flex-1">
-                                <h4 className="font-medium">housing_prices_v{i}.csv</h4>
-                                <p className="text-sm text-muted-foreground">Processed 2 hours ago • 15k rows</p>
+                            <div>
+                                <h4 className="font-semibold text-lg">Upload New Dataset</h4>
+                                <p className="text-sm text-muted-foreground">Start preprocessing a new file</p>
                             </div>
-                            <Button variant="outline" size="sm" className="rounded-full">Resume</Button>
                         </Card>
-                    ))}
+                    </Link>
+                    <Link to="/datasets" className="block group">
+                        <Card className="h-full flex items-center p-6 gap-4 border-2 border-border/50 hover:border-green-500/50 hover:bg-green-500/5 transition-all duration-300 cursor-pointer">
+                            <div className="h-12 w-12 rounded-xl bg-green-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <Database className="h-6 w-6 text-green-500" />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-lg">Browse Datasets</h4>
+                                <p className="text-sm text-muted-foreground">View and manage your data</p>
+                            </div>
+                        </Card>
+                    </Link>
+                    <Link to="/overview" className="block group">
+                        <Card className="h-full flex items-center p-6 gap-4 border-2 border-border/50 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all duration-300 cursor-pointer">
+                            <div className="h-12 w-12 rounded-xl bg-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <BarChart3 className="h-6 w-6 text-purple-500" />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-lg">Learn Platform</h4>
+                                <p className="text-sm text-muted-foreground">Explore features and guides</p>
+                            </div>
+                        </Card>
+                    </Link>
                 </div>
             </motion.section>
         </div>
     )
 }
+

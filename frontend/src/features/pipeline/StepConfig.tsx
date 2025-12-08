@@ -17,6 +17,7 @@ interface StepConfigProps {
 }
 
 export function StepConfig({ step, options, setOptions, columns, datasetType = "tabular" }: StepConfigProps) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateOption = (key: keyof PreprocessingOptions, value: any) => {
         setOptions({ ...options, [key]: value })
     }
@@ -361,266 +362,266 @@ export function StepConfig({ step, options, setOptions, columns, datasetType = "
                                         />
                                     </div>
                                 </>
-                                    </div>
-                    </>
-                ) : datasetType === "audio" ? (
-                    <>
-                        <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
-                            <div className="space-y-0.5">
-                                <Label className="text-base">Trim Silence</Label>
-                                <p className="text-sm text-muted-foreground">Remove silent parts from start/end</p>
-                            </div>
-                            <Switch
-                                checked={options.audio_trim_silence}
-                                onCheckedChange={(c) => updateOption("audio_trim_silence", c)}
-                            />
-                        </div>
-                        <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
-                            <div className="space-y-0.5">
-                                <Label className="text-base">Resample</Label>
-                                <p className="text-sm text-muted-foreground">Change sample rate (e.g. to 16kHz)</p>
-                            </div>
-                            <Switch
-                                checked={options.audio_resample}
-                                onCheckedChange={(c) => updateOption("audio_resample", c)}
-                            />
-                        </div>
-                        {options.audio_resample && (
-                            <div className="space-y-2">
-                                <Label>Target Sample Rate (Hz)</Label>
-                                <input
-                                    type="number"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    value={options.audio_sample_rate || 16000}
-                                    onChange={(e) => updateOption("audio_sample_rate", parseInt(e.target.value))}
-                                />
-                            </div>
-                        )}
-                        <div className="space-y-2">
-                            <Label>Feature Extraction</Label>
-                            <Select
-                                value={options.audio_feature_extraction || "None"}
-                                onValueChange={(v) => updateOption("audio_feature_extraction", v)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="None">None (Keep as Audio)</SelectItem>
-                                    <SelectItem value="MFCC">MFCC (Mel-frequency cepstral coefficients)</SelectItem>
-                                    <SelectItem value="Spectrogram">Spectral Features</SelectItem>
-                                    <SelectItem value="Chroma">Chroma Features</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </>
-                ) : datasetType === "logs" ? (
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
-                            <div className="space-y-0.5">
-                                <Label className="text-base">Extract Timestamp</Label>
-                                <p className="text-sm text-muted-foreground">Find date/time in log lines</p>
-                            </div>
-                            <Switch
-                                checked={options.log_parse_timestamp}
-                                onCheckedChange={(c) => updateOption("log_parse_timestamp", c)}
-                            />
-                        </div>
-                        <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
-                            <div className="space-y-0.5">
-                                <Label className="text-base">Extract Log Levels</Label>
-                                <p className="text-sm text-muted-foreground">Find INFO, ERROR, WARNING</p>
-                            </div>
-                            <Switch
-                                checked={options.log_extract_levels}
-                                onCheckedChange={(c) => updateOption("log_extract_levels", c)}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Regex Extraction Pattern</Label>
-                            <input
-                                type="text"
-                                placeholder="(?P<ip>\d+\.\d+\.\d+\.\d+)"
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                value={options.log_pattern_extraction || ""}
-                                onChange={(e) => updateOption("log_pattern_extraction", e.target.value)}
-                            />
-                            <p className="text-xs text-muted-foreground">Enter a Python regex with named groups to extract columns.</p>
-                        </div>
-                    </div>
-                ) : (
-                    <>
-                        <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
-                            <div className="space-y-0.5">
-                                <Label className="text-base">Date Feature Extraction</Label>
-                                <p className="text-sm text-muted-foreground">Extract Year, Month, Day from dates</p>
-                            </div>
-                            <Switch
-                                checked={options.date_feature_extraction}
-                                onCheckedChange={(c) => updateOption("date_feature_extraction", c)}
-                            />
-                        </div>
-                        <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
-                            <div className="space-y-0.5">
-                                <Label className="text-base">Text Feature Extraction</Label>
-                                <p className="text-sm text-muted-foreground">Extract length, word count from text</p>
-                            </div>
-                            <Switch
-                                checked={options.text_feature_extraction}
-                                onCheckedChange={(c) => updateOption("text_feature_extraction", c)}
-                            />
-                        </div>
 
-                        {/* Time Series Options (Available for Tabular too) */}
-                        {(datasetType === "tabular" || datasetType === "timeseries") && (
-                            <div className="pt-6 border-t">
-                                <h3 className="text-lg font-medium mb-4">Time-Series Operations</h3>
+
+                            ) : datasetType === "audio" ? (
+                                <>
+                                    <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-base">Trim Silence</Label>
+                                            <p className="text-sm text-muted-foreground">Remove silent parts from start/end</p>
+                                        </div>
+                                        <Switch
+                                            checked={options.audio_trim_silence}
+                                            onCheckedChange={(c) => updateOption("audio_trim_silence", c)}
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-base">Resample</Label>
+                                            <p className="text-sm text-muted-foreground">Change sample rate (e.g. to 16kHz)</p>
+                                        </div>
+                                        <Switch
+                                            checked={options.audio_resample}
+                                            onCheckedChange={(c) => updateOption("audio_resample", c)}
+                                        />
+                                    </div>
+                                    {options.audio_resample && (
+                                        <div className="space-y-2">
+                                            <Label>Target Sample Rate (Hz)</Label>
+                                            <input
+                                                type="number"
+                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                value={options.audio_sample_rate || 16000}
+                                                onChange={(e) => updateOption("audio_sample_rate", parseInt(e.target.value))}
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="space-y-2">
+                                        <Label>Feature Extraction</Label>
+                                        <Select
+                                            value={options.audio_feature_extraction || "None"}
+                                            onValueChange={(v) => updateOption("audio_feature_extraction", v)}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="None">None (Keep as Audio)</SelectItem>
+                                                <SelectItem value="MFCC">MFCC (Mel-frequency cepstral coefficients)</SelectItem>
+                                                <SelectItem value="Spectrogram">Spectral Features</SelectItem>
+                                                <SelectItem value="Chroma">Chroma Features</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </>
+                            ) : datasetType === "logs" ? (
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
                                         <div className="space-y-0.5">
-                                            <Label className="text-base">Resampling</Label>
-                                            <p className="text-sm text-muted-foreground">Change frequency (e.g. Daily -> Monthly)</p>
+                                            <Label className="text-base">Extract Timestamp</Label>
+                                            <p className="text-sm text-muted-foreground">Find date/time in log lines</p>
                                         </div>
                                         <Switch
-                                            checked={options.ts_resample}
-                                            onCheckedChange={(c) => updateOption("ts_resample", c)}
-                                        />
-                                    </div>
-                                    {options.ts_resample && (
-                                        <div className="space-y-2">
-                                            <Label>Frequency</Label>
-                                            <Select
-                                                value={options.ts_resample_freq || "D"}
-                                                onValueChange={(v) => updateOption("ts_resample_freq", v)}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="D">Daily</SelectItem>
-                                                    <SelectItem value="W">Weekly</SelectItem>
-                                                    <SelectItem value="M">Monthly</SelectItem>
-                                                    <SelectItem value="H">Hourly</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    )}
-                                    <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
-                                        <div className="space-y-0.5">
-                                            <Label className="text-base">Lag Features</Label>
-                                            <p className="text-sm text-muted-foreground">Create previous time step features (t-1)</p>
-                                        </div>
-                                        <Switch
-                                            checked={options.ts_lag_features}
-                                            onCheckedChange={(c) => updateOption("ts_lag_features", c)}
+                                            checked={options.log_parse_timestamp}
+                                            onCheckedChange={(c) => updateOption("log_parse_timestamp", c)}
                                         />
                                     </div>
                                     <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
                                         <div className="space-y-0.5">
-                                            <Label className="text-base">Rolling Window</Label>
-                                            <p className="text-sm text-muted-foreground">Moving average/std deviation</p>
+                                            <Label className="text-base">Extract Log Levels</Label>
+                                            <p className="text-sm text-muted-foreground">Find INFO, ERROR, WARNING</p>
                                         </div>
                                         <Switch
-                                            checked={options.ts_rolling_window}
-                                            onCheckedChange={(c) => updateOption("ts_rolling_window", c)}
+                                            checked={options.log_extract_levels}
+                                            onCheckedChange={(c) => updateOption("log_extract_levels", c)}
                                         />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Regex Extraction Pattern</Label>
+                                        <input
+                                            type="text"
+                                            placeholder="(?P<ip>\d+\.\d+\.\d+\.\d+)"
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            value={options.log_pattern_extraction || ""}
+                                            onChange={(e) => updateOption("log_pattern_extraction", e.target.value)}
+                                        />
+                                        <p className="text-xs text-muted-foreground">Enter a Python regex with named groups to extract columns.</p>
                                     </div>
                                 </div>
-                            </div>
-                        )}
-                    </>
-                )
-        }
+                            ) : (
+                                <>
+                                    <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-base">Date Feature Extraction</Label>
+                                            <p className="text-sm text-muted-foreground">Extract Year, Month, Day from dates</p>
+                                        </div>
+                                        <Switch
+                                            checked={options.date_feature_extraction}
+                                            onCheckedChange={(c) => updateOption("date_feature_extraction", c)}
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-base">Text Feature Extraction</Label>
+                                            <p className="text-sm text-muted-foreground">Extract length, word count from text</p>
+                                        </div>
+                                        <Switch
+                                            checked={options.text_feature_extraction}
+                                            onCheckedChange={(c) => updateOption("text_feature_extraction", c)}
+                                        />
+                                    </div>
+
+                                    {/* Time Series Options (Available for Tabular too) */}
+                                    {(datasetType === "tabular" || datasetType === "timeseries") && (
+                                        <div className="pt-6 border-t">
+                                            <h3 className="text-lg font-medium mb-4">Time-Series Operations</h3>
+                                            <div className="space-y-4">
+                                                <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                                                    <div className="space-y-0.5">
+                                                        <Label className="text-base">Resampling</Label>
+                                                        <p className="text-sm text-muted-foreground">Change frequency (e.g. Daily &rarr; Monthly)</p>
+                                                    </div>
+                                                    <Switch
+                                                        checked={options.ts_resample}
+                                                        onCheckedChange={(c) => updateOption("ts_resample", c)}
+                                                    />
+                                                </div>
+                                                {options.ts_resample && (
+                                                    <div className="space-y-2">
+                                                        <Label>Frequency</Label>
+                                                        <Select
+                                                            value={options.ts_resample_freq || "D"}
+                                                            onValueChange={(v) => updateOption("ts_resample_freq", v)}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="D">Daily</SelectItem>
+                                                                <SelectItem value="W">Weekly</SelectItem>
+                                                                <SelectItem value="M">Monthly</SelectItem>
+                                                                <SelectItem value="H">Hourly</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                                                    <div className="space-y-0.5">
+                                                        <Label className="text-base">Lag Features</Label>
+                                                        <p className="text-sm text-muted-foreground">Create previous time step features (t-1)</p>
+                                                    </div>
+                                                    <Switch
+                                                        checked={options.ts_lag_features}
+                                                        onCheckedChange={(c) => updateOption("ts_lag_features", c)}
+                                                    />
+                                                </div>
+                                                <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                                                    <div className="space-y-0.5">
+                                                        <Label className="text-base">Rolling Window</Label>
+                                                        <p className="text-sm text-muted-foreground">Moving average/std deviation</p>
+                                                    </div>
+                                                    <Switch
+                                                        checked={options.ts_rolling_window}
+                                                        onCheckedChange={(c) => updateOption("ts_rolling_window", c)}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )
+                            }
                         </div >
                     </div >
                 )
             case "split":
-    return (
-        <div className="space-y-6">
-            <EducationalCard
-                title="Train/Test Split"
-                description="To evaluate your model fairly, you must test it on data it hasn't seen before. We split data into Train and Test sets."
-                nextStep="You are ready to process the dataset!"
-            />
-            <div className="space-y-4">
-                <div className="space-y-2">
-                    <Label>Target Column</Label>
-                    <Select
-                        value={options.target_column || "none"}
-                        onValueChange={(v) => updateOption("target_column", v === "none" ? "" : v)}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select target variable..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="none">None</SelectItem>
-                            {columns.map(col => (
-                                <SelectItem key={col.value} value={col.value}>{col.label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+                return (
+                    <div className="space-y-6">
+                        <EducationalCard
+                            title="Train/Test Split"
+                            description="To evaluate your model fairly, you must test it on data it hasn't seen before. We split data into Train and Test sets."
+                            nextStep="You are ready to process the dataset!"
+                        />
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Target Column</Label>
+                                <Select
+                                    value={options.target_column || "none"}
+                                    onValueChange={(v) => updateOption("target_column", v === "none" ? "" : v)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select target variable..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">None</SelectItem>
+                                        {columns.map(col => (
+                                            <SelectItem key={col.value} value={col.value}>{col.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
-                {options.target_column && (
-                    <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
-                        <div className="flex items-center justify-between">
-                            <Label>Enable Split</Label>
-                            <Switch
-                                checked={options.train_test_split}
-                                onCheckedChange={(c) => updateOption("train_test_split", c)}
-                            />
-                        </div>
-                        {options.train_test_split && (
-                            <div className="space-y-4 pt-2">
-                                <div className="space-y-2">
-                                    <div className="flex justify-between">
-                                        <Label>Test Size: {options.test_size}</Label>
+                            {options.target_column && (
+                                <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
+                                    <div className="flex items-center justify-between">
+                                        <Label>Enable Split</Label>
+                                        <Switch
+                                            checked={options.train_test_split}
+                                            onCheckedChange={(c) => updateOption("train_test_split", c)}
+                                        />
                                     </div>
-                                    {/* Slider could go here */}
+                                    {options.train_test_split && (
+                                        <div className="space-y-4 pt-2">
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between">
+                                                    <Label>Test Size: {options.test_size}</Label>
+                                                </div>
+                                                {/* Slider could go here */}
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <Label>Stratify</Label>
+                                                <Switch
+                                                    checked={options.stratify}
+                                                    onCheckedChange={(c) => updateOption("stratify", c)}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                    <Separator />
+                                    <div className="flex items-center justify-between">
+                                        <div className="space-y-0.5">
+                                            <Label>SMOTE Oversampling</Label>
+                                            <p className="text-xs text-muted-foreground">Balance classes</p>
+                                        </div>
+                                        <Switch
+                                            checked={options.smote_oversampling}
+                                            onCheckedChange={(c) => updateOption("smote_oversampling", c)}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <Label>Stratify</Label>
-                                    <Switch
-                                        checked={options.stratify}
-                                        onCheckedChange={(c) => updateOption("stratify", c)}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                        <Separator />
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                                <Label>SMOTE Oversampling</Label>
-                                <p className="text-xs text-muted-foreground">Balance classes</p>
-                            </div>
-                            <Switch
-                                checked={options.smote_oversampling}
-                                onCheckedChange={(c) => updateOption("smote_oversampling", c)}
-                            />
+                            )}
                         </div>
                     </div>
-                )}
-            </div>
-        </div>
-    )
-    default:
-    return null
-}
+                )
+            default:
+                return null
+        }
     }
 
-return (
-    <motion.div
-        key={step}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="h-full"
-    >
-        <Card className="h-full border-none shadow-none bg-transparent">
-            <CardContent className="p-0">
-                {renderContent()}
-            </CardContent>
-        </Card>
-    </motion.div>
-)
+    return (
+        <motion.div
+            key={step}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="h-full"
+        >
+            <Card className="h-full border-none shadow-none bg-transparent">
+                <CardContent className="p-0">
+                    {renderContent()}
+                </CardContent>
+            </Card>
+        </motion.div>
+    )
 }

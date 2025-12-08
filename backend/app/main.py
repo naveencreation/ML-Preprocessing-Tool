@@ -2,8 +2,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base
+from app.utils.logging import setup_logging, get_logger
 
-from app.routers import datasets, preprocessing, eda, workflows
+from app.routers import datasets, preprocessing, eda, workflows, training, inference
+
+# Setup structured logging
+setup_logging(level="INFO")
+logger = get_logger("main")
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -27,12 +32,17 @@ app.add_middleware(
 def startup_event():
     """Create necessary directories on startup"""
     settings.create_directories()
+    logger.info(f"🚀 {settings.PROJECT_NAME} v{settings.PROJECT_VERSION} started")
+    logger.info(f"📁 Upload directory: {settings.UPLOAD_DIR}")
 
 app.include_router(datasets.router)
 app.include_router(preprocessing.router)
 app.include_router(eda.router)
 app.include_router(workflows.router)
+app.include_router(training.router)
+app.include_router(inference.router)
 
 @app.get("/")
 def read_root():
     return {"message": "Welcome to ML-Preprocessing-Tool API"}
+

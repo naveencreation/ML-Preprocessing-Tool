@@ -16,6 +16,7 @@ class Settings:
     DATA_DIR: Path = BASE_DIR / "data"
     UPLOAD_DIR: Path = DATA_DIR / "uploads"
     PROCESSED_DIR: Path = DATA_DIR / "processed"
+    ARTIFACTS_DIR: Path = DATA_DIR / "artifacts"
     
     # File Upload Limits
     MAX_UPLOAD_SIZE_MB: int = 100
@@ -42,5 +43,6 @@ class Settings:
         self.DATA_DIR.mkdir(exist_ok=True)
         self.UPLOAD_DIR.mkdir(exist_ok=True)
         self.PROCESSED_DIR.mkdir(exist_ok=True)
+        self.ARTIFACTS_DIR.mkdir(exist_ok=True)
 
 settings = Settings()
